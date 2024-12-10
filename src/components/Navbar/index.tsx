@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "../SearchBar";
+import { FaUserCircle } from "react-icons/fa";
 
 const Navbar = () => {
   return (
@@ -16,8 +17,8 @@ const Navbar = () => {
         {/* Search Bar */}
         <SearchBar />
 
-        {/* Login & Register Buttons */}
-        <div className="flex gap-4">
+        {/* Login, Register,*/}
+        <div className="flex items-center gap-4">
           <Link href="/login" passHref>
             <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-400 transition">
               Login
@@ -27,6 +28,14 @@ const Navbar = () => {
             <button className="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-400 transition">
               Register
             </button>
+          </Link>
+
+          {/* User Profile Icon */}
+          <Link href="/profile" passHref>
+            <div className="cursor-pointer flex items-center gap-2 hover:text-gray-400 transition">
+              <FaUserCircle size={24} />
+              <span className="hidden sm:block"></span>
+            </div>
           </Link>
         </div>
       </div>
