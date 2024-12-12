@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "../SearchBar";
 
@@ -9,7 +8,7 @@ const Navbar = () => {
         {/* Logo */}
         <div>
           <Link href="/" passHref>
-            <Image src="/src/assets/logo1.png" alt="Logo" width={100} height={40} />
+          <img src="logo-greenify.png"alt="brand-logo" width={100} height={40} />
           </Link>
         </div>
 
