@@ -10,7 +10,6 @@ const VerificationForm = () => {
     newOtp[index] = value.slice(-1); 
     setOtp(newOtp);
 
-    
     if (value && index < otp.length - 1) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       if (nextInput) nextInput.focus();
@@ -36,6 +35,7 @@ const VerificationForm = () => {
     <form
       onSubmit={handleSubmit}
       className="max-w-md w-full mx-auto bg-white p-8 rounded-lg shadow-md py-32"
+      autoComplete="off" // Disable autocomplete for the entire form
     >
       <h2 className="text-2xl font-semibold text-center mb-4">
         Email Verification
@@ -56,6 +56,7 @@ const VerificationForm = () => {
             className="w-12 h-12 text-center text-xl border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
             maxLength={1}
             required
+            autoComplete="off" // Disable autocomplete for each input field
           />
         ))}
       </div>

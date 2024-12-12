@@ -14,7 +14,7 @@ const products_item = Array.from({ length: 50 }, (_, i) => ({
 }));
 
 const Products = () => {
-    const itemsPerPage = 10;
+    const itemsPerPage = 10; 
     const [currentPage, setCurrentPage] = useState(1);
     const totalPages = Math.ceil(products_item.length / itemsPerPage);
     const paginatedProducts = products_item.slice(
@@ -27,11 +27,11 @@ const Products = () => {
     };
 
     return (
-        <section className="px-4 py-8 bg-white">
-            <h2 className="text-xl font-bold text-center mb-5">Meet Our Products</h2>
+        <section className="px-6 py-8 bg-gray-50">
+            <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Meet Our Products</h2>
 
             {/* Product Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-5 gap-6 max-w-screen-xl mx-auto">
                 {paginatedProducts.map((product) => (
                     <ProductCard
                         key={product.id}
@@ -48,15 +48,15 @@ const Products = () => {
             </div>
 
             {/* Pagination */}
-            <div className="flex justify-center items-center mt-6 space-x-2">
+            <div className="flex justify-center items-center mt-8 space-x-2">
                 {Array.from({ length: totalPages }, (_, i) => (
                     <button
                         key={i + 1}
                         onClick={() => handlePageChange(i + 1)}
-                        className={`px-3 py-1 rounded text-sm ${
+                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors duration-300 ${
                             i + 1 === currentPage
                                 ? "bg-green-600 text-white"
-                                : "bg-white border border-gray-300 text-gray-600 hover:bg-green-600 hover:text-white"
+                                : "bg-white border border-gray-300 text-gray-700 hover:bg-green-600 hover:text-white"
                         }`}
                     >
                         {i + 1}

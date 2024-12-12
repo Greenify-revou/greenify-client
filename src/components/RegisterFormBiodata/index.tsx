@@ -40,14 +40,14 @@ const RegisterFormBiodata = () => {
       onSubmit={handleSubmit}
       className="max-w-[468px] w-full mx-auto bg-white p-6 rounded-lg shadow-md py-16"
     >
-      <h2 className="text-3xl font-medium text-center">Biodata</h2>
+      <h2 className="text-3xl font-medium text-center">Personal Information</h2>
       <p className="text-base font-medium text-center mb-12">
-        Isi data pribadi kamu untuk melakukan registrasi akun greenify
+        Fill in your personal details to register for a Greenify account.
       </p>
 
       <div className="mb-4">
         <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
-          Nama Lengkap
+          Full Name
         </label>
         <input
           type="text"
@@ -77,7 +77,7 @@ const RegisterFormBiodata = () => {
 
       <div className="mb-4">
         <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-          Konfirmasi Password
+          Confirm Password
         </label>
         <input
           type="password"
