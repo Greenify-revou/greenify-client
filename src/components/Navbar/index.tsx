@@ -7,12 +7,12 @@ const Navbar = () => {
   const [isCartVisible, setIsCartVisible] = useState(false);
 
   return (
-    <nav className="bg-white text-black p-4 shadow-md">
+    <nav className="bg-green text-black p-4 shadow-md">
       <div className="max-w-screen-xl mx-auto flex justify-between items-center">
         {/* Logo */}
         <div>
           <Link href="/" passHref>
-            <img src="logo-greenify.png" alt="brand-logo" width={100} height={40} />
+            <img src="greenify-newlogo.png" alt="brand-logo" width={100} height={40} />
           </Link>
         </div>
 
