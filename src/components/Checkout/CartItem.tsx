@@ -1,48 +1,45 @@
 import React from "react";
+import CartItem from "../Checkout/CartItem";
+import CartSummary from "../Checkout/CartSummary";
+import { useCart } from "../../context/CartContext";
 
-interface CartItemProps {
-  id: number;
-  productName: string;
-  productPrice: number;
-  quantity: number;
-  imageUrl: string;
-  onRemove: (id: number) => void;
-  onQuantityChange: (id: number, newQuantity: number) => void;
-}
+const CheckoutPage = () => {
+  const { cartItems, removeFromCart, updateQuantity } = useCart(); 
 
-const CartItem: React.FC<CartItemProps> = ({
-  id,
-  productName,
-  productPrice,
-  quantity,
-  imageUrl,
-  onRemove,
-  onQuantityChange,
-}) => {
+  const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+
+  const handleCheckout = () => {
+    alert("Proceed to checkout!");
+  };
+
   return (
-    <div className="flex items-center border-b pb-4 mb-4">
-      <img src={imageUrl} alt={productName} className="w-16 h-16 rounded-md" />
-      <div className="ml-4 flex-1">
-        <h4 className="font-medium text-lg">{productName}</h4>
-        <button
-          className="text-sm text-red-500 underline"
-          onClick={() => onRemove(id)}
-        >
-          Remove
-        </button>
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Checkout</h1>
+
+      {/* Cart Items */}
+      <div className="border rounded-md p-4 mb-4">
+        {cartItems.length > 0 ? (
+          cartItems.map((item) => (
+            <CartItem
+              key={item.id}
+              id={item.id}
+              productName={item.name}
+              productPrice={item.price}
+              quantity={item.quantity}
+              imageUrl="https://via.placeholder.com/100" 
+              onRemove={removeFromCart}
+              onQuantityChange={updateQuantity}
+            />
+          ))
+        ) : (
+          <p>Your cart is empty.</p>
+        )}
       </div>
-      <div className="flex items-center">
-        <input
-          type="number"
-          value={quantity}
-          min={1}
-          onChange={(e) => onQuantityChange(id, Number(e.target.value))}
-          className="w-12 text-center border rounded"
-        />
-        <p className="ml-4">${(productPrice * quantity).toFixed(2)}</p>
-      </div>
+
+      {/* Cart Summary */}
+      <CartSummary subtotal={subtotal} onCheckout={handleCheckout} />
     </div>
   );
 };
 
-export default CartItem;
+export default CheckoutPage;

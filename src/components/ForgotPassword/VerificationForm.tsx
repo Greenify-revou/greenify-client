@@ -35,7 +35,7 @@ const VerificationForm = () => {
     <form
       onSubmit={handleSubmit}
       className="max-w-md w-full mx-auto bg-white p-8 rounded-lg shadow-md py-32"
-      autoComplete="off" // Disable autocomplete for the entire form
+      autoComplete="off" 
     >
       <h2 className="text-2xl font-semibold text-center mb-4">
         Email Verification
