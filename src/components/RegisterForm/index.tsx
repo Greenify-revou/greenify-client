@@ -1,7 +1,9 @@
 import { API_REGISTER } from "@/src/constants/api";
 import { useState } from "react";
+import Link from "next/link";
+import { FaArrowLeft } from "react-icons/fa"; 
 
-const RegisterForm = () => {
+const RegisterForm = ({ onNext }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState(""); 
@@ -35,59 +37,54 @@ const RegisterForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-sm mx-auto bg-white p-8 rounded-lg shadow-md">
-      <h2 className="text-2xl font-semibold text-center mb-4">Register</h2>
-      <div className="mb-4">
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          type="email"
-          id="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      <div className="mb-4">
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-        <input
-          type="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      {/* Input Nomor Telepon */}
-      <div className="mb-4">
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone Number</label>
-        <input
-          type="tel"
-          id="phone"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
-      {/* Input Tanggal Lahir */}
-      <div className="mb-4">
-        <label htmlFor="birthDate" className="block text-sm font-medium text-gray-700">Birth Date</label>
-        <input
-          type="date"
-          id="birthDate"
-          value={birthDate}
-          onChange={(e) => setBirthDate(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          required
-        />
-      </div>
+    <div className="relative max-w-[468px] w-full mx-auto bg-white p-6 rounded-lg shadow-md py-16">
+      {/* Back arrow icon */}
+      <Link href="/">
+        <FaArrowLeft className="absolute top-6 left-6 w-6 h-6 text-gray-700 cursor-pointer hover:text-dark-green transition-all duration-300" />
+      </Link>
 
-      <button type="submit" className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-400">
-        Register
-      </button>
-    </form>
+      <form onSubmit={handleSubmit}>
+        <h2 className="text-3xl font-medium text-center">Sign Up Now!</h2>
+        <p className="text-base font-medium text-center mb-12">
+          Already have an account?{" "}
+          <Link href="/login" className="text-dark-green hover:opacity-50 transition-all duration-300">
+            Sign In Now
+          </Link>
+        </p>
+
+        <button
+          type="button"
+          className="flex justify-center items-center gap-2 w-full py-2 min-h-8 text-xs rounded-xl bg-white hover:bg-gray-200 border transition-all duration-300"
+        >
+          <img src="../images/google-icon.svg" alt="Google Logo" className="w-4 h-4" />
+          Sign up with Google account
+        </button>
+
+        <hr className="my-4" />
+
+        <div className="mb-4">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email address
+          </label>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dark-green focus:outline-none text-sm"
+            required
+          />
+          <p className="text-xs font-light mt-2 mb-6">Contoh: you@example.com</p>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full h-8 bg-[#56B280] text-white rounded-xl hover:bg-green-400 transition-all duration-300"
+        >
+          Next Step
+        </button>
+      </form>
+    </div>
   );
 };
 

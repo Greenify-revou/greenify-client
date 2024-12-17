@@ -1,4 +1,5 @@
-import { FaStar, FaRegStar } from "react-icons/fa";
+import { FaStar } from "react-icons/fa";
+import Link from "next/link";
 
 interface ProductProps {
     id: number;
@@ -12,75 +13,40 @@ interface ProductProps {
 }
 
 const ProductCard = (props: ProductProps) => {
-    // const navigate = useNavigate();
-
-    const handleNavigate = () => {
-        navigate(`/product-detail/${props.id}`);
-    };
-
     return (
-        <section 
-            className="bg-white shadow-md rounded-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow border border-gray-200 max-w-xs"
-            onClick={handleNavigate}
-        >
-            {/* Product Image */}
-            <img
-                src={props.image}
-                alt={props.product_name}
-                className="w-full h-36 object-cover"
-            />
+        <Link href={`/product-detail/${props.id}`} passHref>
+            <section
+                className="bg-white shadow-sm rounded-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow border border-gray-300"
+            >
+                {/* Product Image */}
+                <img
+                    src={props.image}
+                    alt={props.product_name}
+                    className="w-full h-40 sm:h-48 object-cover"
+                />
 
-            <div className="p-4">
-                {/* Product Name */}
-                <h3 className="text-sm font-bold text-gray-800 truncate">
-                    {props.product_name}
-                </h3>
+                {/* Card Content */}
+                <div className="p-3">
+                    {/* Product Name */}
+                    <h3 className="text-sm sm:text-base font-bold text-gray-800 line-clamp-2">
+                        {props.product_name}
+                    </h3>
 
-                {/* Product Category */}
-                <p className="text-xs text-gray-500 mt-1">
-                    {props.product_category}
-                </p>
+                    {/* Product Price */}
+                    <p className="text-base sm:text-lg font-semibold text-[#56B280] mt-1">
+                        Rp {props.product_price.toLocaleString("id-ID")}
+                    </p>
 
-                {/* Product Price */}
-                <p className="text-md font-semibold text-gray-800 mt-2">
-                    Rp {props.product_price.toLocaleString("id-ID")}
-                </p>
+                    {/* Location */}
+                    <p className="text-xs sm:text-sm text-gray-500 mt-1">Jakarta Barat</p>
 
-                {/* Echo Point */}
-                <div className="flex items-center text-xs text-gray-600 mt-2">
-                    <span className="mr-2">Echo Points:</span>
-                    {Array.from({ length: 5 }, (_, index) => {
-                        const isFull = index + 1 <= Math.floor(props.echo_points);
-                        return (
-                            <span key={index} className="text-yellow-400">
-                                {isFull ? (
-                                    <FaStar className="inline mb-1" />
-                                ) : (
-                                    <FaRegStar className="inline mb-1" />
-                                )}
-                            </span>
-                        );
-                    })}
+                    {/* Rating */}
+                    <div className="flex items-center text-xs sm:text-sm text-yellow-500 mt-1">
+                        <FaStar className="mr-1" /> 4.9 | 10rb+ sold
+                    </div>
                 </div>
-
-                {/* Echo Material */}
-                <div className="flex items-center text-xs text-gray-600 mt-1">
-                    <span className="mr-2">Echo Materials:</span>
-                    {Array.from({ length: 5 }, (_, index) => {
-                        const isFull = index + 1 <= Math.floor(props.echo_materials);
-                        return (
-                            <span key={index} className="text-yellow-400">
-                                {isFull ? (
-                                    <FaStar className="inline mb-1" />
-                                ) : (
-                                    <FaRegStar className="inline mb-1" />
-                                )}
-                            </span>
-                        );
-                    })}
-                </div>
-            </div>
-        </section>
+            </section>
+        </Link>
     );
 };
 

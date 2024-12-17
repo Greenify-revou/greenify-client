@@ -6,27 +6,31 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { useRouter } from "next/router";
 import { PROTECTED_PAGE } from "../constants/pages";
 import { AuthProvider } from "../context/AuthContext";
+import { CartProvider } from "../context/CartContext";
 
 export default function App({ Component, pageProps }: AppProps) {
-  const router = useRouter()
+  const router = useRouter();
+
+  // Pages that don't require layout
+  const noLayoutPages = ["/login", "/register"];
+  const isNoLayoutPage = noLayoutPages.includes(router.pathname);
+
+  // Pages that require authentication
   const isProtectedRoute = PROTECTED_PAGE.includes(router.pathname);
 
   return (
-    <>
     <AuthProvider>
-      <Navbar />
-      {!isProtectedRoute ? 
-        (<Component {...pageProps}/>)
-        :
-        (
-          <ProtectedRoute>
+      <CartProvider>
+        {!isNoLayoutPage && <Navbar />}
+        {!isProtectedRoute ? (
           <Component {...pageProps} />
+        ) : (
+          <ProtectedRoute>
+            <Component {...pageProps} />
           </ProtectedRoute>
-        )
-      }
-      <Footer />
+        )}
+        {!isNoLayoutPage && <Footer />}
+      </CartProvider>
     </AuthProvider>
-    </>
   );
 }
-
