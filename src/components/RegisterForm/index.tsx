@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa"; 
 
-const RegisterForm = ({ onNext }) => {
+const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState(""); 
