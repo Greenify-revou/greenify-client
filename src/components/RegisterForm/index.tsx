@@ -1,13 +1,35 @@
+import { API_REGISTER } from "@/src/constants/api";
 import { useState } from "react";
 
 const RegisterForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState(""); 
-  const [birthDate, setBirthDate] = useState(""); 
+  const [birthDate, setBirthDate] = useState("");  
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    try{
+      const response = await fetch(API_REGISTER, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, phone, birthDate }),
+      })
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Register failed with status ${data.message}`);
+      }
+
+      console.log(data.message);
+      
+    } catch (error) {
+      console.error(error);
+    }
     
     console.log("Register with:", { email, password, phone, birthDate });
   };
