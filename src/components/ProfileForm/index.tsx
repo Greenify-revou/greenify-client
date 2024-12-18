@@ -1,3 +1,4 @@
+import { useAuth } from "@/src/context/AuthContext";
 import React, { useState } from "react";
 
 const ProfilePage: React.FC = () => {

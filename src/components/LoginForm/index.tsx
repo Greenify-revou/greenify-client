@@ -19,6 +19,7 @@ const LoginForm = () => {
       console.error(error)
     }
     console.log('Login with:', { email, password, rememberMe })
+    router.push('/profile')
   }
 
   const handleForgotPassword = () => {

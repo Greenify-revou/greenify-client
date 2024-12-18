@@ -17,14 +17,10 @@ const ProtectedRoute = ({children}: ProtectedRouteProps) => {
     }, [isAuthenticated])
 
   return (
-    loading || !isAuthenticated ? 
-        (<p>Loading...</p>) 
-        : 
-        (
-            <div>
-                {children}
-            </div>
-        )
+    loading || isAuthenticated ? 
+    (<div>{children}</div>)
+    : 
+    (<p>Loading...</p>)
   )
 }
 

@@ -1,11 +1,17 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import { API_CHECK_OTP, API_REFRESH_OTP } from "@/src/constants/api";
 
-const VerificationForm = () => {
-  const [otp, setOtp] = useState(Array(4).fill(""));
+interface VerificationFormProps {
+  email: string;
+  onNext?: () => void;
+}
+
+const VerificationForm = ({ email, onNext }: VerificationFormProps) => {
+  const [otp, setOtp] = useState(Array(6).fill(""));
   const router = useRouter();
 
-  const handleChange = (value, index) => {
+  const handleChange = (value: string, index: number) => {
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1); 
     setOtp(newOtp);
@@ -16,19 +22,65 @@ const VerificationForm = () => {
     }
   };
 
-  const handleKeyDown = (e, index) => {
+  const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       const prevInput = document.getElementById(`otp-${index - 1}`);
       if (prevInput) prevInput.focus();
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const otpCode = otp.join("");
     console.log("Verifying OTP code:", otpCode);
 
-    router.push("/forgot-password/reset");
+    try {
+      const response = await fetch(API_CHECK_OTP, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
+          email: email,
+          otp_code: otpCode 
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+
+      const json = response.json();
+
+      console.log(json);
+
+      if (onNext) {
+        onNext();
+      } else {
+        router.push("/forgot-password/reset");
+      }
+      
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const resendOTPCode = async () => {
+    try {
+      const response = await fetch(API_REFRESH_OTP, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -71,7 +123,7 @@ const VerificationForm = () => {
       <div className="text-center mt-4">
         <button
           type="button"
-          onClick={() => console.log("Resend OTP")}
+          onClick={resendOTPCode}
           className="text-blue-500 hover:underline"
         >
           Didn't get the code? Resend Code

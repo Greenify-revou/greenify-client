@@ -3,9 +3,11 @@ import { API_ME, API_LOGIN } from "../../constants/api";
 
 // Define types for user data and AuthContext
 interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
+  dateofbirth: string;
+  gender: string;
 }
 
 interface AuthContextType {
@@ -27,59 +29,71 @@ interface AuthProviderProps {
 // AuthProvider Component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-
+  const [loading, setLoading] = useState(false);
 
   // Load user from localStorage when app initializes
-  const fetchUserProfile = () => {
-        fetch(API_ME, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${localStorage.getItem("token_access")}`
-            },
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            setUser(data);
-        })
-        .catch((error) => {
-            console.error(error);
-        })
-        .finally(() => {
-            setLoading(false);
-        })
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch(API_ME, {
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+          },
+      })
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Fetch user profile failed ${json.message}`);
+      }
+
+      setUser(json.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(true);
+    }
   }
 
   // Login function
-  const login = (email: string, password: string) => {
-    fetch(API_LOGIN, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: email,
-        password: password
-      })
-    })
-    .then((response) => response.json())
-    .then((data) => {
-      localStorage.setItem("token_access", data.token_access);
-      fetchUserProfile();
-    })
-    .catch((error) => {
-      console.error(error);
-    })
-    .finally(() => {
-        setLoading(false);
-    })
+  const login = async (email: string, password: string) => {
+    try {
+          const response = await fetch(API_LOGIN, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              email: email,
+              password: password
+            })
+          })
 
-  };
+          const json = await response.json();
+
+          if(!response.ok) {
+            throw new Error(`Login failed: ${json.message}`);
+          }
+          
+          try {
+            localStorage.setItem("access_token", json.data.access_token);
+            await fetchUserProfile();
+          } catch (error) {
+            throw new Error(`Login failed: ${json.message}`);
+          }
+    }
+    catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(true);
+    }
+  }
 
   // Logout function
   const logout = () => {
-    localStorage.removeItem("token_access");
+    setLoading(false);
+    localStorage.removeItem("access_token");
     setUser(null);
   };
 

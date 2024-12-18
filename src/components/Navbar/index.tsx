@@ -3,10 +3,13 @@ import { useCart } from "../../context/CartContext";
 import { FaShoppingCart } from "react-icons/fa";
 import Link from "next/link";
 import SearchBar from "../SearchBar";
+import { useAuth } from "@/src/context/AuthContext";
+import { BiLogoUnity } from "react-icons/bi";
 
 const Navbar = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
   const [cartCount, setCartCount] = useState<number>(0);
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     setCartCount(cartItems.reduce((acc, item) => acc + item.quantity, 0));
@@ -99,20 +102,32 @@ const Navbar = () => {
               )}
             </div>
           </div>
-
-          {/* Login Button */}
-          <Link href="/login" passHref>
-            <button className="bg-white text-[#56B280] py-2 px-4 rounded hover:bg-gray-100 transition">
-              Login
-            </button>
-          </Link>
-
-          {/* Register Button */}
-          <Link href="/register" passHref>
-            <button className="bg-[#56B280] text-white py-2 px-4 rounded hover:bg-[#4c9f67] transition">
-              Register
-            </button>
-          </Link>
+          
+          {isAuthenticated ? (
+            // If authenticated, show logout button
+            <Link href="/login" passHref>
+              <button
+                className="bg-[#56B280] text-white py-2 px-4 rounded hover:bg-[#4c9f67] transition"
+                onClick={() => logout()} // Use onClick for buttons
+              >
+                Logout
+              </button>
+            </Link>
+          ) : (
+            // If not authenticated, show login and register buttons
+            <div className="flex space-x-4">
+              <Link href="/login" passHref>
+                <button className="bg-white text-[#56B280] py-2 px-4 rounded hover:bg-gray-100 transition">
+                  Login
+                </button>
+              </Link>
+              <Link href="/register" passHref>
+                <button className="bg-[#56B280] text-white py-2 px-4 rounded hover:bg-[#4c9f67] transition">
+                  Register
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </nav>

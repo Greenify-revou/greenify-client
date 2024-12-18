@@ -1,39 +1,42 @@
-import { API_REGISTER } from "@/src/constants/api";
+import { API_EMAIL_VALIDATION} from "@/src/constants/api";
 import { useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa"; 
+import { useRouter } from "next/router";
 
-const RegisterForm = () => {
+interface RegisterFormProps {
+  getEmail: (email: string) => void;
+  onNext: () => void;
+}
+
+const RegisterForm = ({ getEmail, onNext }: RegisterFormProps) => {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phone, setPhone] = useState(""); 
-  const [birthDate, setBirthDate] = useState("");  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try{
-      const response = await fetch(API_REGISTER, {
+    try {
+      const response = await fetch(API_EMAIL_VALIDATION, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password, phone, birthDate }),
-      })
-
-      const data = await response.json();
+        body: JSON.stringify({ email }),
+      });
 
       if (!response.ok) {
-        throw new Error(`Register failed with status ${data.message}`);
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
-      console.log(data.message);
-      
+      const json = await response.json();
+
+      getEmail(email);
     } catch (error) {
       console.error(error);
     }
     
-    console.log("Register with:", { email, password, phone, birthDate });
+    console.log("Validate Email:", { email });
+    onNext();
   };
 
   return (
@@ -77,11 +80,14 @@ const RegisterForm = () => {
           <p className="text-xs font-light mt-2 mb-6">Contoh: you@example.com</p>
         </div>
 
+
         <button
           type="submit"
           className="w-full h-8 bg-[#56B280] text-white rounded-xl hover:bg-green-400 transition-all duration-300"
+          disabled={!email}
+          onSubmit={handleSubmit}
         >
-          Next Step
+          Validate Email
         </button>
       </form>
     </div>
