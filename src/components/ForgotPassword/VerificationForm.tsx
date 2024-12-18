@@ -59,7 +59,6 @@ const VerificationForm = ({ email, onNext }: VerificationFormProps) => {
       } else {
         router.push("/forgot-password/reset");
       }
-      
     } catch (error) {
       console.error(error);
     }

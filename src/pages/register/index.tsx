@@ -4,9 +4,10 @@ import RegisterFormBiodata from '../../components/RegisterFormBiodata'
 import VerificationForm from '../../components/ForgotPassword/VerificationForm'
 import RegisterInterestForm from '@/src/components/RegisterInterestForm'
 import { API_REGISTER } from '@/src/constants/api'
+import { useRouter } from 'next/router'
 
 interface RegistrationData {
-  fullName: string
+  name: string
   email: string
   dateofbirth: string // ISO format (YYYY-MM-DD)
   gender: string
@@ -17,13 +18,14 @@ interface RegistrationData {
 const RegisterPage = () => {
   const [step, setStep] = useState(1) // Steps in the registration process
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
-    fullName: '',
+    name: '',
     email: '',
     dateofbirth: '',
     gender: '',
     password: '',
     interests: []
   })
+  const router = useRouter()
 
   const nextStep = () => {
     setStep((prevStep) => prevStep + 1)
@@ -37,7 +39,7 @@ const RegisterPage = () => {
   }
 
   const handleBiodataSubmit = (biodataData: {
-    fullName: string
+    name: string
     dateofbirth: string
     gender: string
     password: string
@@ -73,6 +75,9 @@ const RegisterPage = () => {
     }
 
     setStep((prevStep) => prevStep + 1)
+    if (step >= 4) {
+      router.push('/login')
+    }
   }
 
   return (

@@ -1,3 +1,4 @@
+import { API_CATEGORIES } from '@/src/constants/api'
 import React, { useEffect, useState } from 'react'
 
 interface InterestModel {
@@ -33,10 +34,10 @@ const RegisterInterestForm: React.FC<RegisterInterestFormProps> = ({
   const fetchInterests = async () => {
     try {
       const response = await fetch(
-        'http://127.0.0.1:5000/api/v1/products/category'
+        API_CATEGORIES
       )
       const data = await response.json()
-      setInterests(data)
+      setInterests(data.data)
     } catch (error) {
       console.error('Error fetching interests:', error)
     }
@@ -49,9 +50,9 @@ const RegisterInterestForm: React.FC<RegisterInterestFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className='max-w-[468px] w-full mx-auto bg-white p-6 rounded-lg shadow-md py-16'
+      className='flex justify-center flex-wrap gap-1 max-w-[468px] w-full mx-auto bg-white p-6 rounded-lg shadow-md py-16'
     >
-      {interests.map((item) => (
+      {interests && interests?.map((item) => (
         <button
           type='button'
           key={item.id}
