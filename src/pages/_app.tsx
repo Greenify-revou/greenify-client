@@ -7,7 +7,7 @@ import { CartProvider } from "../context/CartContext";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const noLayoutPages = ["/login", "/register"];
+  const noLayoutPages = ["/login", "/register", "/dashboard-seller","/dashboard-seller/voucherPage", "/dashboard-seller/productPage"];
 
   const isNoLayoutPage = noLayoutPages.includes(router.pathname);
 
