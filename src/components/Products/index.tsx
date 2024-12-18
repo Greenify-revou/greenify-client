@@ -1,5 +1,7 @@
 import { useState } from "react";
 import ProductCard from "./ProductCard";
+import useFetch from "@/src/hooks/useFetch";
+import { API_PRODUCT } from "@/src/constants/api";
 
 // Product Mock Up Models
 const products_item = Array.from({ length: 50 }, (_, i) => ({
@@ -13,14 +15,40 @@ const products_item = Array.from({ length: 50 }, (_, i) => ({
     image: "https://via.placeholder.com/200",
 }));
 
+interface Product {
+    id: number;
+    product_name: string;
+    price: number;
+    product_desc: string;
+    category: string;
+    eco_point: number;
+    recyle_material: number;
+    review: [number];
+    stock: number;
+    seller_id: number;
+    category_id: number;
+    image: string;
+}
+
+interface Response {
+    data: Product[];
+    message: string;
+    status: number;
+}
+
 const Products = () => {
+    const { data, loading, error } = useFetch<Response>({ endpoint: API_PRODUCT })
+
+    const products = data?.data || [];
+
     const itemsPerPage = 10;
     const [currentPage, setCurrentPage] = useState(1);
-    const totalPages = Math.ceil(products_item.length / itemsPerPage);
-    const paginatedProducts = products_item.slice(
+    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const paginatedProducts = products.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
+
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -39,12 +67,12 @@ const Products = () => {
                         key={product.id}
                         id={product.id}
                         product_name={product.product_name}
-                        product_description={product.product_description}
-                        product_category={product.product_category}
-                        echo_points={product.echo_points}
-                        echo_materials={product.echo_materials}
+                        product_description={product.product_desc}
+                        product_category={product.category}
+                        echo_points={product.eco_point}
+                        echo_materials={product.recyle_material}
                         image={product.image}
-                        product_price={product.product_price}
+                        product_price={product.price}
                     />
                 ))}
             </div>

@@ -1,23 +1,33 @@
 import { useRouter } from "next/router";
 import ProductDetail from "../../components/ProductDetail";
+import useFetch from "@/src/hooks/useFetch";
+import { API_PRODUCT } from "@/src/constants/api";
+
+interface Product {
+    id: number;
+    product_name: string;
+    price: number;
+    product_desc: string;
+    category: string;
+    eco_point: number;
+    recycle_material: number;
+    stok: number;
+    image: string;
+}
+
+interface Response {
+    data: Product;
+    message: string;
+    status: number;
+}
 
 const ProductDetailPage = () => {
     const router = useRouter();
     const { id } = router.query;
 
-    // Mock Data
-    const mockProducts = Array.from({ length: 50 }, (_, i) => ({
-        id: i + 1,
-        product_name: `Product Name ${i + 1}`,
-        product_price: 130000 + i * 5000,
-        product_description: `Detailed description for Product ${i + 1}`,
-        product_category: `Category ${i + 1}`,
-        echo_points: 4 + (i % 5),
-        echo_materials: 3 + (i % 4),
-        image: "https://via.placeholder.com/500",
-    }));
+    const { data, loading, error } = useFetch<Response>({ endpoint: API_PRODUCT + `/${id}` })
 
-    const product = mockProducts.find((item) => item.id === Number(id));
+    const product = data?.data || [];
 
     if (!product) {
         return (

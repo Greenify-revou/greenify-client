@@ -42,7 +42,7 @@ const ProductCard = (props: ProductProps) => {
 
                     {/* Rating */}
                     <div className="flex items-center text-xs sm:text-sm text-yellow-500 mt-1">
-                        <FaStar className="mr-1" /> 4.9 | 10rb+ sold
+                        <FaStar className="mr-1" /> 4.9 
                     </div>
                 </div>
             </section>
