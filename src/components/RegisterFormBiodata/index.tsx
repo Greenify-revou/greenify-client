@@ -2,7 +2,7 @@ import { useState } from 'react'
 
 interface RegisterFormBiodataProps {
   onSubmit: (data: {
-    fullName: string
+    name: string
     dateofbirth: string
     gender: string
     password: string
@@ -49,14 +49,13 @@ const RegisterFormBiodata = ({
     }
 
     const biodataData = {
-      fullName: formData.fullName,
+      name: formData.fullName,
       dateofbirth: `${formData.birthDate.year}-${formData.birthDate.month}-${formData.birthDate.day}`,
       gender: formData.gender,
       password: formData.password
     }
 
     onSubmit(biodataData)
-    onNext()
   }
 
   return (
