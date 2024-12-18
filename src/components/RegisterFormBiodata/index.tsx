@@ -1,16 +1,24 @@
+import { API_REGISTER } from '@/src/constants/api';
 import { useState } from 'react';
 
-const RegisterFormBiodata = () => {
+interface RegisterFormBiodataProps {
+  email: string;
+}
+
+const RegisterFormBiodata = ({ email }: RegisterFormBiodataProps) => {
   const [formData, setFormData] = useState({
     fullName: '',
     password: '',
     confirmPassword: '',
     birthDate: { year: '', month: '', day: '' },
+    gender: ''
   });
 
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-
+  
     if (name === 'year' || name === 'month' || name === 'day') {
       setFormData((prev) => ({
         ...prev,
@@ -19,17 +27,44 @@ const RegisterFormBiodata = () => {
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: value, // Handles other fields like fullName and gender
       }));
     }
   };
+  
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
       alert('Password dan Konfirmasi Password tidak cocok');
       return;
+    }
+
+    try {
+      const response = await fetch(API_REGISTER, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          name: formData.fullName,
+          dateofbirth: `${formData.birthDate.year}-${formData.birthDate.month}-${formData.birthDate.day}`,
+          gender: formData.gender,
+          password: formData.password,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const json = await response.json();
+
+      console.log(json);
+    } catch (error) {
+      console.error(error);
     }
 
     console.log('Register Data:', formData);
@@ -88,6 +123,25 @@ const RegisterFormBiodata = () => {
           className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dark-green focus:outline-none text-sm"
           required
         />
+      </div>
+
+      <div className="mb-4">
+      {/* Gender Dropdown */}
+        <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+          Gender
+        </label>
+        <select
+          id="gender"
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          className="w-full h-8 py-1 px-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dark-green focus:outline-none text-sm"
+          required
+        >
+          <option value="" disabled>Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </div>
 
       <div className="mb-4">

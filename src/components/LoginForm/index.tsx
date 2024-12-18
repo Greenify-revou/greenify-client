@@ -2,16 +2,24 @@ import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { FaArrowLeft } from 'react-icons/fa'
+import { useAuth } from '@/src/context/AuthContext'
 
 const LoginForm = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const router = useRouter()
+  const { login, loading } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    try{
+      await login(email, password)
+    } catch (error) {
+      console.error(error)
+    }
     console.log('Login with:', { email, password, rememberMe })
+    router.push('/profile')
   }
 
   const handleForgotPassword = () => {
@@ -90,7 +98,7 @@ const LoginForm = () => {
           type="submit"
           className="w-full h-8 bg-[#56B280] border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#56B280] focus:outline-none text-sm text-white hover:bg-green-400"
         >
-          Login
+          {loading ? 'loading...' : 'Login'}
         </button>
         <hr className="my-4" />
         <button
