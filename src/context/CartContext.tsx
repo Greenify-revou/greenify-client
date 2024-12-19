@@ -1,12 +1,15 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { API_ADD_TO_CART, API_CART_ITEMS, API_DECREASE_ITEM_CART, API_UPDATE_CART } from "../constants/api";
+import useFetch from "../hooks/useFetch";
 
 // Interface untuk Cart Item
 interface CartItem {
   id: number;
-  name: string;
-  price: number;
+  product_name: string;
+  product_id: number;
+  total_price: number;
   quantity: number;
-  imageUrl: string;  // Jika Anda ingin menambahkan gambar produk
+  image_url: string;  // Jika Anda ingin menambahkan gambar produk
 }
 
 // Interface untuk CartContext
@@ -15,6 +18,12 @@ interface CartContextType {
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantityChange: number) => void;
+}
+
+interface Response {
+  data: CartItem[];
+  message: string;
+  status: number;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -28,10 +37,36 @@ export const useCart = () => {
 };
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // State untuk menyimpan daftar cartItems
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
-  const addToCart = (item: CartItem) => {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("access_token");
+      setAccessToken(token);
+    }
+  }, [accessToken]);
+
+  // Memoize headers to prevent infinite re-renders
+  const headers = useMemo(() => {
+    if (!accessToken) return undefined;
+    return { Authorization: `Bearer ${accessToken}` };
+  }, [accessToken]);
+
+  const { data, error, loading } = useFetch<Response>({
+    endpoint: API_CART_ITEMS,
+    headers,
+  });
+
+  // Avoid fetching if accessToken is not available yet
+  useEffect(() => {
+    if (data) {
+      setCartItems(data.data);
+    }
+  }, [data]);
+
+
+  const addToCart = async (item: CartItem) => {
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((i) => i.id === item.id);
       if (existingItem) {
@@ -41,25 +76,107 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return [...prevItems, { ...item, quantity: 1 }];
     });
+
+    try {
+      const response = await fetch(API_ADD_TO_CART, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify({product_id: item.product_id}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      console.log("Item added to cart:", item);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const removeFromCart = (id: number) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
-  };
+  const removeFromCart = async (id: number) => {
+    setCartItems((prevItems) => prevItems.filter((item) => item.product_id !== id));
 
-  const updateQuantity = (id: number, quantityChange: number) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === id) {
-          const newQuantity = item.quantity + quantityChange;
-          if (newQuantity >= 1) {
-            return { ...item, quantity: newQuantity }; 
-          }
+    const fetchToUpdateCart = async () => {
+      try {
+        const response = await fetch(API_UPDATE_CART, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+          },
+          body: JSON.stringify({
+            product_id: id,
+            quantity: 0
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
-        return item;
-      })
-    );
+  
+        console.log("Removed item from cart:", id);
+      } catch (error) {
+        console.error(error);
+      };
+    }
+
+    fetchToUpdateCart();
   };
+
+  const updateQuantity = async (id: number, quantityChange: number) => {
+    // Calculate the new quantity without updating the state
+    let newQuantity = 0;
+    const currentCart = [...cartItems]; // Assuming cartItems is your state
+  
+    const item = currentCart.find((item) => item.product_id === id);
+    if (!item) {
+      console.error("Item not found in the cart.");
+      return;
+    }
+  
+    newQuantity = item.quantity + quantityChange;
+  
+    // Prevent sending the request if the quantity is less than 1
+    if (newQuantity < 1) {
+      console.error("Quantity cannot be less than 1.");
+      return;
+    }
+  
+    try {
+      // Send the update request to the backend
+      const response = await fetch(API_UPDATE_CART, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify({
+          product_id: id,
+          quantity: newQuantity,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+  
+      // If successful, update the cart state
+      setCartItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === id ? { ...item, quantity: newQuantity } : item
+        )
+      );
+  
+      console.log("Item quantity updated:", id, newQuantity);
+    } catch (error) {
+      console.error("Failed to update quantity on the server:", error);
+    }
+  };
+  
 
   return (
     <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity }}>

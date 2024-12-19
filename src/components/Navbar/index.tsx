@@ -58,8 +58,8 @@ const Navbar = () => {
                     <div key={item.id} className="flex justify-between mb-2 items-center">
                       {/* Product Image and Name */}
                       <div className="flex items-center gap-3">
-                        <img src={item.imageUrl} alt={item.name} width={40} height={40} className="object-cover" />
-                        <span className="block text-sm font-semibold">{item.name}</span>
+                        <img src={item.image_url} alt={item.product_name} width={40} height={40} className="object-cover" />
+                        <span className="block text-sm font-semibold">{item.product_name}</span>
                       </div>
 
                       {/* Quantity Controls */}

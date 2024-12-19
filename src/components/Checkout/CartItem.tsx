@@ -1,45 +1,45 @@
 import React from "react";
-import CartItem from "../Checkout/CartItem";
 import CartSummary from "../Checkout/CartSummary";
-import { useCart } from "../../context/CartContext";
 
-const CheckoutPage = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart(); 
+interface CartItemProps {
+  id: number;
+  product_name: string;
+  image_url: string;
+  total_price: number;
+  quantity: number;
+}
 
-  const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-
-  const handleCheckout = () => {
-    alert("Proceed to checkout!");
-  };
+const CartItem: React.FC<CartItemProps> = ({ id, product_name, image_url, total_price, quantity }) => {
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-4">Checkout</h1>
 
       {/* Cart Items */}
-      <div className="border rounded-md p-4 mb-4">
-        {cartItems.length > 0 ? (
-          cartItems.map((item) => (
-            <CartItem
-              key={item.id}
-              id={item.id}
-              productName={item.name}
-              productPrice={item.price}
-              quantity={item.quantity}
-              imageUrl="https://via.placeholder.com/100" 
-              onRemove={removeFromCart}
-              onQuantityChange={updateQuantity}
-            />
-          ))
-        ) : (
-          <p>Your cart is empty.</p>
-        )}
+      <div className="space-y-4">
+        <div
+          key={id}
+          className="border rounded-md p-4 flex items-center gap-4"
+        >
+          <img
+            src={image_url}
+            alt={product_name}
+            className="w-16 h-16 object-cover"
+          />
+          <div>
+            <h2 className="text-lg font-semibold">{product_name}</h2>
+            <p className="text-sm text-gray-600">
+              Price: Rp {total_price.toLocaleString("id-ID")}
+            </p>
+            <p className="text-sm text-gray-600">Quantity: {quantity}</p>
+          </div>
+        </div>
       </div>
 
       {/* Cart Summary */}
-      <CartSummary subtotal={subtotal} onCheckout={handleCheckout} />
+      {/* <CartSummary subtotal={subtotal} onCheckout={handleCheckout} /> */}
     </div>
   );
 };
 
-export default CheckoutPage;
+export default CartItem;

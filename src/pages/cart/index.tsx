@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useCart } from "../../context/CartContext";
 import Link from "next/link";
+import { API_CART_CHECKOUT} from "@/src/constants/api";
+import { useRouter } from "next/router";
 
 const CartPage = () => {
   const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const [orderId, setOrderId] = useState<number>(0);
+  const router = useRouter();
 
   const handleIncrease = (itemId: number) => {
     updateQuantity(itemId, 1);
@@ -16,6 +20,33 @@ const CartPage = () => {
   const handleRemove = (itemId: number) => {
     removeFromCart(itemId);
   };
+
+  const handleCheckout = async () => {
+    try {
+      const response = await fetch(API_CART_CHECKOUT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      router.push(`/checkout/${data.data.id}`);
+      
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    console.log("Cart Items:", cartItems);
+  }, [handleIncrease, handleDecrease, handleRemove]);
 
   return (
     <section className="max-w-screen-lg mx-auto py-8 px-4">
@@ -31,11 +62,11 @@ const CartPage = () => {
               <div key={item.id} className="flex items-center justify-between border-b pb-4">
                 {/* Product Info */}
                 <div className="flex items-center gap-4">
-                  <img src={item.imageUrl} alt={item.name} className="w-16 h-16 object-cover" />
+                  <img src={item.image_url} alt={item.product_name} className="w-16 h-16 object-cover" />
                   <div>
-                    <h2 className="text-lg font-semibold">{item.name}</h2>
+                    <h2 className="text-lg font-semibold">{item.product_name}</h2>
                     <p className="text-sm text-gray-600">
-                      Price: Rp {item.price.toLocaleString("id-ID")}
+                      Price: Rp {item.total_price.toLocaleString("id-ID")}
                     </p>
                   </div>
                 </div>
@@ -44,7 +75,7 @@ const CartPage = () => {
                 <div className="flex items-center gap-2">
                   <button
                     className="px-3 py-1 bg-gray-200 rounded"
-                    onClick={() => handleDecrease(item.id)}
+                    onClick={() => handleDecrease(item.product_id)}
                     disabled={item.quantity <= 1}
                   >
                     -
@@ -52,7 +83,7 @@ const CartPage = () => {
                   <span>{item.quantity}</span>
                   <button
                     className="px-3 py-1 bg-gray-200 rounded"
-                    onClick={() => handleIncrease(item.id)}
+                    onClick={() => handleIncrease(item.product_id)}
                   >
                     +
                   </button>
@@ -61,7 +92,7 @@ const CartPage = () => {
                 {/* Remove Button */}
                 <button
                   className="text-red-500 hover:text-red-700"
-                  onClick={() => handleRemove(item.id)}
+                  onClick={() => handleRemove(item.product_id)}
                 >
                   Remove
                 </button>
@@ -77,17 +108,19 @@ const CartPage = () => {
               <span className="font-bold">
                 Rp{" "}
                 {cartItems
-                  .reduce((acc, item) => acc + item.price * item.quantity, 0)
+                  .reduce((acc, item) => acc + item.total_price * item.quantity, 0)
                   .toLocaleString("id-ID")}
               </span>
             </p>
 
             {/* Checkout Button */}
-            <Link href="/checkout" passHref>
-              <button className="mt-4 w-full bg-[#56B280] text-white py-2 rounded hover:bg-green-600 transition">
-                Proceed to Checkout
-              </button>
-            </Link>
+            <button 
+              className="mt-4 w-full bg-[#56B280] text-white py-2 rounded hover:bg-green-600 transition"
+              disabled={cartItems.length === 0}
+              onClick={handleCheckout}
+            >
+              Proceed to Checkout
+            </button>
           </div>
         </>
       )}
