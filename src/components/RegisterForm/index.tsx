@@ -59,7 +59,7 @@ const RegisterForm = ({ getEmail, onNext }: RegisterFormProps) => {
           type="button"
           className="flex justify-center items-center gap-2 w-full py-2 min-h-8 text-xs rounded-xl bg-white hover:bg-gray-200 border transition-all duration-300"
         >
-          <img src="../images/google-icon.svg" alt="Google Logo" className="w-4 h-4" />
+          <img src="google-icon-logo.svg" alt="Google Logo" className="w-4 h-4" />
           Sign up with Google account
         </button>
 
@@ -74,7 +74,7 @@ const RegisterForm = ({ getEmail, onNext }: RegisterFormProps) => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dark-green focus:outline-none text-sm"
+            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#56B280] text-sm"
             required
           />
           <p className="text-xs font-light mt-2 mb-6">Contoh: you@example.com</p>
