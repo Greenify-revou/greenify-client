@@ -53,7 +53,7 @@ const LoginForm = () => {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dark-green focus:outline-none text-sm"
+            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#56B280] text-sm"
             required
           />
         </div>
@@ -75,7 +75,7 @@ const LoginForm = () => {
             id="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-dark-green focus:outline-none text-sm"
+            className="w-full h-8 py-2 px-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#56B280] text-sm"
             required
           />
         </div>
@@ -105,7 +105,7 @@ const LoginForm = () => {
           type="button"
           className="flex gap-4 justify-center items-center w-full h-8 bg-white border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#56B280] focus:outline-none text-sm"
         >
-          <img src="/public/google-icon.svg" alt="Google" className="w-4 h-4" />
+          <img src="google-icon-logo.svg" alt="Google" className="w-4 h-4" />
           Sign Up with Google Account
         </button>
       </form>
