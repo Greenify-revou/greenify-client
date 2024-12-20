@@ -3,17 +3,28 @@ import { useRouter } from "next/router";
 import ProductCard from "../../components/Products/ProductCard";
 import { API_CATEGORY, API_SEARCH_PRODUCT } from "@/src/constants/api";
 
+
+
 interface ProductProps {
     id: number;
     product_name: string;
     category_name: string;
     product_desc: string;
-    price: number;
+    price: number; // Update this to be a number
     image_url: string;
     eco_point: number;
     recycle_material: number;
     discount?: number;
-    reviews?: { rating: number }[];
+    reviews: {
+        average_rating: number | null;
+        total_reviews: number;
+        reviews: {
+            user_name: string;
+            review: string;
+            rating: number;
+            created_at: string;
+        }[];
+    };
 }
 
 interface Category {
@@ -23,12 +34,12 @@ interface Category {
 
 const SearchPage = () => {
     const router = useRouter();
-    const { words, category } = router.query; // Extract `words` and `category` query parameters
+    const { words, category } = router.query;
 
     const [products, setProducts] = useState<ProductProps[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string | null>(
-        (category as string) || null // Initialize with the query parameter value
+        (category as string) || null
     );
     const [minPrice, setMinPrice] = useState<string>("");
     const [maxPrice, setMaxPrice] = useState<string>("");
@@ -62,33 +73,35 @@ const SearchPage = () => {
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         setError(null);
-
+    
         try {
             const queryParams = new URLSearchParams({
                 page: currentPage.toString(),
                 per_page: itemsPerPage.toString(),
-                ...(words && { words: words.toString() }), // Add search words
+                ...(words && { words: words.toString() }),
                 ...(selectedCategory && { category: selectedCategory }),
                 ...(minPrice && { min_price: minPrice }),
                 ...(maxPrice && { max_price: maxPrice }),
                 has_discount: hasDiscount ? "true" : "false",
                 sort_order: sortOrder === "newest" ? "desc" : "asc",
             });
-
+    
             const response = await fetch(`${API_SEARCH_PRODUCT}?${queryParams}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                 },
             });
-
+    
             if (!response.ok) {
                 throw new Error(`Failed to fetch products: ${response.statusText}`);
             }
-
+    
             const data = await response.json();
+    
+            // Update products and pagination based on the API structure
             setProducts(data.data.products || []);
-            setTotalPages(data.data.pagination.total_pages || 1);
+            setTotalPages(data.data.pagination?.total_pages || 1);
         } catch (error: unknown) {
             setError(
                 (error as Error).message || "An error occurred while fetching products."
@@ -106,17 +119,14 @@ const SearchPage = () => {
         sortOrder,
     ]);
 
-    // Fetch categories on mount
     useEffect(() => {
         fetchCategories();
     }, [fetchCategories]);
 
-    // Fetch products when filters or page change
     useEffect(() => {
         fetchProducts();
     }, [fetchProducts]);
 
-    // Update `selectedCategory` if `category` query parameter changes
     useEffect(() => {
         if (category) {
             setSelectedCategory(category as string);
@@ -203,6 +213,7 @@ const SearchPage = () => {
                     />{" "}
                     Has Discount
                 </div>
+
                 {/* Sort Order */}
                 <div>
                     <label
@@ -232,9 +243,7 @@ const SearchPage = () => {
             {/* Products Section */}
             <main className="flex-1 p-6 bg-white">
                 {error && (
-                    <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">
-                        {error}
-                    </div>
+                    <div className="bg-red-100 text-red-600 p-4 mb-4 rounded">{error}</div>
                 )}
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
@@ -245,17 +254,11 @@ const SearchPage = () => {
                         {products.length > 0 ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-6">
                                 {products.map((product) => (
-                                    <ProductCard
-                                        key={product.id}
-                                        {...product}
-                                        reviews={product.reviews || []} // Ensure reviews is an array
-                                    />
+                                    <ProductCard key={product.id} {...product} />
                                 ))}
                             </div>
                         ) : (
-                            <p className="text-center text-gray-500 mt-10">
-                                No products found.
-                            </p>
+                            <p className="text-center text-gray-500 mt-10">No products found.</p>
                         )}
 
                         {/* Pagination */}
@@ -271,10 +274,11 @@ const SearchPage = () => {
                                 <button
                                     key={index}
                                     onClick={() => handlePageChange(index + 1)}
-                                    className={`px-4 py-2 rounded ${currentPage === index + 1
+                                    className={`px-4 py-2 rounded ${
+                                        currentPage === index + 1
                                             ? "bg-green-600 text-white"
                                             : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-                                        }`}
+                                    }`}
                                 >
                                     {index + 1}
                                 </button>
