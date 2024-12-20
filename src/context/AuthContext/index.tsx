@@ -3,7 +3,7 @@ import { API_ME, API_LOGIN } from "../../constants/api";
 
 // Define types for user data and AuthContext
 interface Address {
-  id : number;
+  id: number;
   address: string;
   name_address: string;
   city: string;
@@ -26,7 +26,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => void;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (updatedUserData: Partial<User>) => Promise<void>;
   fetchUserProfile: () => Promise<void>;
@@ -43,83 +43,79 @@ interface AuthProviderProps {
 // AuthProvider Component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // Load user from localStorage when app initializes
+  // Fetch user profile
   const fetchUserProfile = async () => {
     try {
+      setLoading(true);
       const response = await fetch(API_ME, {
-          method: "GET",
-          headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${localStorage.getItem("access_token")}`
-          },
-      })
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
 
       const json = await response.json();
 
       if (!response.ok) {
-        throw new Error(`Fetch user profile failed ${json.message}`);
+        throw new Error(`Fetch user profile failed: ${json.message}`);
       }
 
       setUser(json.data);
+      setIsAuthenticated(true);
     } catch (error) {
-      console.error(error);
+      console.error("Failed to fetch user profile:", error);
+      setIsAuthenticated(false);
     } finally {
-      setLoading(true);
+      setLoading(false);
     }
-  }
+  };
 
   // Login function
   const login = async (email: string, password: string) => {
     try {
-          const response = await fetch(API_LOGIN, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              email: email,
-              password: password
-            })
-          })
-
-          const json = await response.json();
-
-          if(!response.ok) {
-            throw new Error(`Login failed: ${json.message}`);
-          }
-          
-          try {
-            localStorage.setItem("access_token", json.data.access_token);
-            await fetchUserProfile();
-          } catch {
-            throw new Error(`Login failed: ${json.message}`);
-          }
-    }
-    catch (error) {
-      console.error(error);
-    } finally {
       setLoading(true);
+      const response = await fetch(API_LOGIN, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Login failed: ${json.message}`);
+      }
+
+      localStorage.setItem("access_token", json.data.access_token);
+      await fetchUserProfile(); // Fetch user profile after login
+    } catch (error) {
+      console.error("Login error:", error);
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   // Logout function
   const logout = () => {
-    setLoading(false);
-    localStorage.removeItem("access_token");
     setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem("access_token");
   };
-  
-  // isAuthenticate check
+
+  // Check authentication state on app load
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
       fetchUserProfile();
-      setIsAuthenticated(true);
     } else {
-      setIsAuthenticated(false);
+      setLoading(false);
     }
   }, []);
 
@@ -146,7 +142,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         ...updatedUserData,
       }));
     } catch (error) {
-      console.error(error);
+      console.error("Failed to update user:", error);
       throw new Error("Failed to update user");
     }
   };
@@ -160,7 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         loading,
         isAuthenticated,
         updateUser,
-        fetchUserProfile
+        fetchUserProfile,
       }}
     >
       {children}
