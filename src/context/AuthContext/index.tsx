@@ -3,7 +3,9 @@ import { API_ME, API_LOGIN } from "../../constants/api";
 
 // Define types for user data and AuthContext
 interface Address {
+  id : number;
   address: string;
+  name_address: string;
   city: string;
   province: string;
   postal_code: string;
@@ -17,7 +19,7 @@ interface User {
   dateofbirth: string;
   gender: string;
   phone_number: string;
-  address: Address[];
+  addresses: Address[];
 }
 
 interface AuthContextType {
@@ -27,6 +29,7 @@ interface AuthContextType {
   login: (email: string, password: string) => void;
   logout: () => void;
   updateUser: (updatedUserData: Partial<User>) => Promise<void>;
+  fetchUserProfile: () => Promise<void>;
 }
 
 // Create the AuthContext
@@ -156,7 +159,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         loading,
         isAuthenticated,
-        updateUser
+        updateUser,
+        fetchUserProfile
       }}
     >
       {children}
