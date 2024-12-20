@@ -1,17 +1,24 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import CartItem from "./CartItem";
-import axios from "axios";
+import { API_ADD_VOUCHER, API_CART_ITEMS, API_ORDER_ITEMS, API_PAYMENT } from "@/src/constants/api";
+import { useRouter } from "next/router";
 
-interface CartItemData {
+interface OrderItem {
   id: number;
-  productName: string;
-  productPrice: number;
+  invoice_number: string;
+  product_id: number;
+  product_name: string;
+  total_price: number;
   quantity: number;
-  imageUrl: string;
+  image_url: string;
 }
 
-const CheckoutPage: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItemData[]>([]);
+interface CheckoutPageProps {
+  order_id: string;
+}
+
+const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
   const [shippingFee, setShippingFee] = useState(7000); 
   const [insuranceFee, setInsuranceFee] = useState(800); 
@@ -19,59 +26,106 @@ const CheckoutPage: React.FC = () => {
   const [total, setTotal] = useState(0);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [promoCode, setPromoCode] = useState("");
+  const router = useRouter();
 
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      const response = await axios.get("/api/cart");
-      setCartItems(response.data.items);
-      calculateTotals(response.data.items, shippingFee, insuranceFee, useInsurance);
-    };
+  const fetchOrderItems = async () => {
+    try {
+      const response = await fetch(API_ORDER_ITEMS + `/${order_id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        }
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
 
-    fetchCartItems();
-  }, [shippingFee, insuranceFee, useInsurance]);
+      console.log(data)
 
-  const calculateTotals = (items: CartItemData[], shipping: number, insurance: number, insuranceActive: boolean) => {
-    const cartSubtotal = items.reduce((sum, item) => sum + item.productPrice * item.quantity, 0);
+      setOrderItems(data.data);
+    } catch (error) {
+      console.error("Error fetching cart items:", error);
+    }
+  };
+
+  const calculateTotals = () => {
+    const cartSubtotal = orderItems.reduce((sum, item) => sum + item.total_price * item.quantity, 0);
     setSubtotal(cartSubtotal);
-    const finalTotal = cartSubtotal + shipping + (insuranceActive ? insurance : 0);
+    const finalTotal = cartSubtotal + shippingFee + (useInsurance ? insuranceFee : 0);
     setTotal(finalTotal);
   };
 
-  const handleRemoveItem = (id: number) => {
-    const updatedCart = cartItems.filter((item) => item.id !== id);
-    setCartItems(updatedCart);
-    calculateTotals(updatedCart, shippingFee, insuranceFee, useInsurance);
-  };
-
-  const handleQuantityChange = (id: number, newQuantity: number) => {
-    const updatedCart = cartItems.map((item) =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    );
-    setCartItems(updatedCart);
-    calculateTotals(updatedCart, shippingFee, insuranceFee, useInsurance);
-  };
+  useEffect(() => {
+    fetchOrderItems();
+  }, []);
+  
+  useEffect(() => {
+    calculateTotals();
+  }, [orderItems, shippingFee, useInsurance]);
 
   const handleInsuranceToggle = () => {
     setUseInsurance(!useInsurance);
   };
 
-  const handleCheckout = async () => {
+  const handlePayment = async () => {
     try {
-      await axios.post("/api/checkout", { items: cartItems, total });
-      alert("Checkout successful!");
+      const response = await fetch(API_PAYMENT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify({
+          order_id: order_id,
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      };
+
+      console.log("Payment successful!");
+
+      router.push(`/review/${order_id}`);
     } catch (error) {
       console.error("Checkout failed", error);
     }
-  };
+  }
 
   const togglePromoModal = () => {
     setIsPromoModalOpen(!isPromoModalOpen);
   };
 
-  const handlePromoSubmit = () => {
-    alert(`Promo code ${promoCode} submitted!`);
-    setIsPromoModalOpen(false);
+  const handlePromoSubmit = async () => {
+    try {
+      const response = await fetch(API_ADD_VOUCHER, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify({
+          invoice_number: orderItems[0]?.invoice_number,
+          kode_voucher: promoCode
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+  
+      console.log("Promo code applied successfully!");
+      // Re-fetch order items after applying the promo code
+      await fetchOrderItems();
+    } catch (error) {
+      console.error("Error applying promo code:", error);
+    } finally {
+      setIsPromoModalOpen(false);
+      setPromoCode(""); // Reset promo code input
+    }
   };
+  
 
   return (
     <div className="max-w-5xl mx-auto p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -87,17 +141,16 @@ const CheckoutPage: React.FC = () => {
 
         {/* Cart Items */}
         <div className="border rounded-md p-4 mb-4">
-          {cartItems.length > 0 ? (
-            cartItems.map((item) => (
+          <h1 className="text-2xl font-bold mb-4">Checkout</h1>
+          {orderItems.length > 0 ? (
+            orderItems.map((item) => (
               <CartItem
                 key={item.id}
-                id={item.id}
-                productName={item.productName}
-                productPrice={item.productPrice}
+                id={item.product_id}
+                product_name={item.product_name}
+                total_price={item.total_price}
                 quantity={item.quantity}
-                imageUrl={item.imageUrl}
-                onRemove={handleRemoveItem}
-                onQuantityChange={handleQuantityChange}
+                image_url={item.image_url}
               />
             ))
           ) : (
@@ -224,7 +277,7 @@ const CheckoutPage: React.FC = () => {
 
         {/* Checkout Button */}
         <button
-          onClick={handleCheckout}
+          onClick={handlePayment}
           className="w-full bg-[#56B280] text-white py-2 rounded-md font-bold hover:bg-green-600"
         >
           Pay Now

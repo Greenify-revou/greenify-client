@@ -11,7 +11,7 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 interface UseFetchParams {
   endpoint: string
   method?: HttpMethod
-  body?:  Record<string, any>;
+  body?:  string;
   headers?: Record<string, string>
 }
 

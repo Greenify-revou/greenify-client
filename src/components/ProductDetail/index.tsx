@@ -39,8 +39,9 @@ const ProductDetailCard = ({
   const handleAddToCart = () => {
     const item = {
       id,
-      name: product_name,
-      price: price,
+      product_id: id,
+      product_name: product_name,
+      total_price: price,
       quantity: 1,
       imageUrl: selectedImage,
     };
