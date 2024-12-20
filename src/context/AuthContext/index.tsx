@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import React, { createContext, useState, useContext, ReactNode } from "react";
 import { API_ME, API_LOGIN } from "../../constants/api";
 
 // Define types for user data and AuthContext
@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           try {
             localStorage.setItem("access_token", json.data.access_token);
             await fetchUserProfile();
-          } catch (error) {
+          } catch {
             throw new Error(`Login failed: ${json.message}`);
           }
     }
