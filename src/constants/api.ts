@@ -25,3 +25,4 @@ export const API_ADD_ADDRESS = `${API_URL}/addresses/add-address`;
 export const API_UPDATE_ADDRESS = `${API_URL}/addresses/update-address`;
 export const API_DELETE_ADDRESS = `${API_URL}/addresses/delete-address`;
 export const API_GET_USER_ADDRESS = `${API_URL}/addresses/get-user-address-by-id`;
+export const API_CREATE_SELLER = `${API_URL}/sellers/create-seller`;

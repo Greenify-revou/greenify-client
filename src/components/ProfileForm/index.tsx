@@ -1,6 +1,7 @@
 import { API_ADD_ADDRESS, API_UPDATE_ADDRESS } from "@/src/constants/api";
 import { useAuth } from "@/src/context/AuthContext";
 import React, { useState } from "react";
+import Swal from "sweetalert2";
 
 interface Address {
   id?: number;
@@ -20,10 +21,7 @@ interface User {
   gender: string;
   phone_number: string;
   addresses: Address[];
-}
-
-interface PersonalProfileProps {
-  user: User | null;
+  profile_picture: string | null;
 }
 
 const ProfilePage: React.FC = () => {
@@ -41,7 +39,6 @@ const ProfilePage: React.FC = () => {
   const handleAddressUpdate = async () => {
     await fetchUserProfile(); // Refetch the user data to update the address list
   };
-
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
@@ -67,7 +64,7 @@ const ProfilePage: React.FC = () => {
       {activeTab === "profile" ? (
         <PersonalProfile user={user} />
       ) : (
-        <AddressList addresses={user?.addresses} onAddressChange={handleAddressUpdate} />
+        <AddressList addresses={user.addresses} onAddressChange={handleAddressUpdate} />
       )}
     </div>
   );
@@ -76,6 +73,10 @@ const ProfilePage: React.FC = () => {
 interface PersonalProfileProps {
   user: User | null;
 }
+
+const fixImageUrl = (url: string): string => {
+  return url.replace("https://i.ibb.co/", "https://i.ibb.co.com/");
+};
 
 const PersonalProfile: React.FC<PersonalProfileProps> = ({ user }) => {
   const { updateUser } = useAuth();
@@ -86,37 +87,116 @@ const PersonalProfile: React.FC<PersonalProfileProps> = ({ user }) => {
     gender: user?.gender || "",
   });
 
+  const [profileImage, setProfileImage] = useState<string | null>(user?.profile_picture || null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setProfileImage(URL.createObjectURL(file)); // Temporary preview
+    }
+  };
+
+  const handleImageUpload = async () => {
+    if (!imageFile) {
+      Swal.fire({
+        icon: "warning",
+        title: "No File Selected",
+        text: "Please choose an image file before uploading.",
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", imageFile);
+
+    try {
+      const response = await fetch("https://api.imgbb.com/1/upload?key=fc83cc32be937c536fe6b2af550feeea", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload image.");
+      }
+
+      const data = await response.json();
+      const uploadedUrl = fixImageUrl(data.data.url); // Apply fixImageUrl function
+
+      setProfileImage(uploadedUrl); // Update with the fixed URL
+      Swal.fire({
+        icon: "success",
+        title: "Image Uploaded",
+        text: "Your profile image has been uploaded successfully.",
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Upload Failed",
+        text: "There was an error uploading your image. Please try again.",
+      });
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await updateUser(formData);
-      alert("Profile updated successfully!");
+      await updateUser({ ...formData, profile_picture: profileImage });
+      Swal.fire({
+        icon: "success",
+        title: "Profile Updated",
+        text: "Your profile has been updated successfully.",
+      });
     } catch (error) {
       console.error(error);
-      alert("Failed to update profile.");
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: "There was an error updating your profile. Please try again.",
+      });
     }
   };
 
   return (
     <div>
-      <div className="flex flex-col items-center mb-4">
-        <img
-          src="https://via.placeholder.com/100"
-          alt="Profile"
-          className="w-24 h-24 rounded-full border-2 border-gray-300 mb-2"
-        />
-        <button className="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300 mb-2">
-          Choose Photo
+      <div className="flex flex-col items-center mb-4 relative">
+        {/* Profile Image Preview */}
+        <div className="w-24 h-24 rounded-full border-2 border-gray-300 mb-4 flex items-center justify-center relative overflow-hidden">
+          <img
+            src={profileImage || "https://via.placeholder.com/100"}
+            alt="Profile"
+            className="object-cover w-full h-full"
+          />
+          {/* File Input */}
+          <input
+            type="file"
+            onChange={handleImageChange}
+            className="absolute inset-0 opacity-0 cursor-pointer"
+          />
+          {/* Text Inside Circle */}
+          <span className="absolute text-xs text-gray-700">Choose File</span>
+        </div>
+
+        {/* Upload Image Button */}
+        <button
+          onClick={handleImageUpload}
+          className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600 mb-2"
+        >
+          Upload Image
         </button>
+
         <button className="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300">
           Change Password
         </button>
       </div>
+
       <form className="space-y-4" onSubmit={handleSave}>
         <div>
           <label className="block text-sm font-medium text-gray-700">Name</label>
@@ -134,7 +214,7 @@ const PersonalProfile: React.FC<PersonalProfileProps> = ({ user }) => {
           <input
             type="date"
             name="dateofbirth"
-            value={new Date(formData.dateofbirth).toLocaleDateString("en-CA")} // Format as 'YYYY-MM-DD'
+            value={new Date(formData.dateofbirth).toLocaleDateString("en-CA")}
             onChange={handleChange}
             className="w-full border border-gray-300 px-3 py-2 rounded focus:ring focus:ring-green-300"
           />
@@ -174,6 +254,8 @@ const PersonalProfile: React.FC<PersonalProfileProps> = ({ user }) => {
   );
 };
 
+
+
 const AddressList: React.FC<{
   addresses: Address[] | undefined;
   onAddressChange: () => void;
@@ -182,9 +264,7 @@ const AddressList: React.FC<{
   const [isEditAddressModalOpen, setEditAddressModalOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
-  const toggleAddAddressModal = () => {
-    setAddAddressModalOpen((prev) => !prev);
-  };
+  const toggleAddAddressModal = () => setAddAddressModalOpen((prev) => !prev);
 
   const toggleEditAddressModal = (address?: Address) => {
     setSelectedAddress(address || null);
@@ -269,18 +349,29 @@ const AddAddressModal: React.FC<{ onClose: () => void; onSuccess: () => void }> 
       });
 
       if (response.ok) {
-        alert("Address added successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Address Added",
+          text: "Your address has been added successfully.",
+        });
         onClose();
-        onSuccess(); // Trigger the callback to update addresses
+        onSuccess();
       } else {
-        alert("Failed to add address.");
+        Swal.fire({
+          icon: "error",
+          title: "Add Address Failed",
+          text: "There was an issue adding the address.",
+        });
       }
     } catch (error) {
       console.error(error);
-      alert("Error while adding address.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while adding the address.",
+      });
     }
   };
-
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
@@ -359,12 +450,12 @@ const EditAddressModal: React.FC<{ address: Address; onClose: () => void; onSucc
   onClose,
   onSuccess,
 }) => {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<Address>({
+    name_address: address.name_address || "",
     address: address.address || "",
     city: address.city || "",
-    postal_code: `${address.postal_code}` || "",
     province: address.province || "",
-    name: address.name_address || "",
+    postal_code: address.postal_code || "",
     phone_number: address.phone_number || "",
   });
 
@@ -386,15 +477,27 @@ const EditAddressModal: React.FC<{ address: Address; onClose: () => void; onSucc
       });
 
       if (response.ok) {
-        alert("Address updated successfully!");
+        Swal.fire({
+          icon: "success",
+          title: "Address Updated",
+          text: "Your address has been updated successfully.",
+        });
         onSuccess();
         onClose();
       } else {
-        alert("Failed to update address.");
+        Swal.fire({
+          icon: "error",
+          title: "Update Failed",
+          text: "There was an issue updating the address.",
+        });
       }
     } catch (error) {
       console.error(error);
-      alert("Error while updating address.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while updating the address.",
+      });
     }
   };
 
@@ -405,8 +508,8 @@ const EditAddressModal: React.FC<{ address: Address; onClose: () => void; onSucc
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="name_address"
+            value={formData.name_address}
             onChange={handleChange}
             placeholder="Name Address"
             className="w-full border p-2 rounded-md"
@@ -469,6 +572,5 @@ const EditAddressModal: React.FC<{ address: Address; onClose: () => void; onSucc
     </div>
   );
 };
-
 
 export default ProfilePage;
