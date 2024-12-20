@@ -2,7 +2,7 @@ import { FaStar, FaRecycle, FaLeaf } from "react-icons/fa";
 import Link from "next/link";
 import Image from "next/image";
 
-interface ProductProps {
+export interface ProductProps {
     id: number;
     product_name: string;
     category_name: string;

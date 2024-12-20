@@ -2,21 +2,15 @@ import { useRouter } from "next/router";
 import ProductDetail from "../../components/ProductDetail";
 import useFetch from "@/src/hooks/useFetch";
 import { API_PRODUCT } from "@/src/constants/api";
+import { ProductProps } from "@/src/components/Products/ProductCard";
 
-interface Product {
-    id: number;
-    product_name: string;
-    price: number;
-    product_desc: string;
-    category: string;
-    eco_point: number;
-    recycle_material: number;
-    stok: number;
-    image: string;
+
+
+interface ProductDetailModel extends ProductProps{
+    stok : number;
 }
-
 interface Response {
-    data: Product;
+    data: ProductDetailModel;
     message: string;
     status: number;
 }
@@ -50,22 +44,22 @@ const ProductDetailPage = () => {
     }
 
     const product = data.data;
-
+    console.log(data.data);
     // Map Product to match ProductDetailCardProps
     const productProps = {
         id: product.id,
         product_name: product.product_name,
         price: product.price,
         product_desc: product.product_desc,
-        category: product.category,
+        category: product.category_name,
         eco_point: product.eco_point,
         recycle_material: product.recycle_material,
         stok: product.stok,
-        image_url: product.image, // Rename `image` to `image_url`
+        image_url: product.image_url, // Renaming `image` to `image_url`
         reviews: {
-            average_rating: null, // Example data (replace with actual)
-            total_reviews: 0, // Example data (replace with actual)
-            reviews: [], // Example data (replace with actual)
+            average_rating: product.reviews?.average_rating || null, // Ensure `average_rating` exists or set to null
+            total_reviews: product.reviews?.total_reviews || 0, // Ensure `total_reviews` exists or set to 0
+            reviews: product.reviews?.reviews || [], // Ensure `reviews` is an array or default to an empty array
         },
     };
 
