@@ -1,15 +1,8 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { API_RECOMMENDATIONS, API_CATEGORY } from "@/src/constants/api";
 import RecommendationCard from "./RecommendationCard";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-=======
-import { useState } from "react";
-import ProductCard from "./ProductCard";
-import useFetch from "@/src/hooks/useFetch";
-import { API_ALL_PRODUCT } from "@/src/constants/api";
->>>>>>> dev-frontend
 
 interface Recommendation {
     id: number;

@@ -1,6 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { API_ME, API_LOGIN } from "../../constants/api";
-import { set } from "react-hook-form";
 
 // Define types for user data and AuthContext
 interface Address {

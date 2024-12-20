@@ -11,7 +11,6 @@ export const API_CATEGORIES = `${API_URL}/products/categories`;
 export const API_CATEGORY   = `${API_URL}/products/get-all-category`
 export const API_SEARCH_PRODUCT   = `${API_URL}/products/search-all-product`
 export const API_RECOMMENDATIONS   = `${API_URL}/products/recommendation`
-export const API_CATEGORIES = `${API_URL}/products/get-all-category`;
 export const API_ADD_TO_CART = `${API_URL}/carts/add-to-cart`;
 export const API_DECREASE_ITEM_CART = `${API_URL}/carts/decrease-cart`;
 export const API_UPDATE_CART = `${API_URL}/carts/update-quantity`;
