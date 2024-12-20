@@ -12,7 +12,16 @@ interface ProductProps {
     eco_point: number;
     recycle_material: number;
     discount?: number;
-    reviews: { rating: number }[];
+    reviews: {
+        average_rating: number | null;
+        total_reviews: number;
+        reviews: {
+            user_name: string;
+            review: string;
+            rating: number;
+            created_at: string;
+        }[];
+    };
 }
 
 const ProductCard = ({
@@ -26,10 +35,8 @@ const ProductCard = ({
     discount,
     reviews,
 }: ProductProps) => {
-    // Calculate the average rating
-    const averageRating = reviews.length
-        ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-        : null;
+    const averageRating = reviews?.average_rating;
+    const totalReviews = reviews?.total_reviews;
 
     // Format price to Indonesian Rupiah
     const formattedPrice = new Intl.NumberFormat("id-ID", {
@@ -40,7 +47,8 @@ const ProductCard = ({
     return (
         <Link href={`/product-detail/${id}`} passHref>
             <section
-                className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-transform border border-gray-200 relative flex flex-col h-80"
+                className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-transform border border-gray-200 relative flex flex-col h-96"
+                aria-label={`View details of ${product_name}`}
             >
                 {/* Discount Badge */}
                 {discount && discount > 0 && (
@@ -50,7 +58,7 @@ const ProductCard = ({
                 )}
 
                 {/* Product Image */}
-                <div className="relative w-full h-36">
+                <div className="relative w-full h-40">
                     <Image
                         src={image_url}
                         alt={product_name}
@@ -64,7 +72,7 @@ const ProductCard = ({
                 {/* Card Content */}
                 <div className="p-4 flex flex-col flex-grow">
                     {/* Product Name */}
-                    <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 mb-2">
+                    <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 mb-1">
                         {product_name}
                     </h3>
 
@@ -83,8 +91,8 @@ const ProductCard = ({
                         <FaStar className="mr-1" />
                         {averageRating ? (
                             <span>
-                                {averageRating} | {reviews.length}{" "}
-                                {reviews.length > 1 ? "reviews" : "review"}
+                                {averageRating} | {totalReviews}{" "}
+                                {totalReviews > 1 ? "reviews" : "review"}
                             </span>
                         ) : (
                             <span>No reviews yet</span>

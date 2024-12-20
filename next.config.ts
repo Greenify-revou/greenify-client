@@ -8,7 +8,8 @@ const nextConfig: NextConfig = {
       "giphy.com",     // General Giphy domain
       "via.placeholder.com",
       "ibb.co.com",
-      "i.ibb.co.com" // For placeholder images
+      "i.ibb.co.com",
+      "i.ibb.co.com"// For placeholder images
     ],
   },
 };

@@ -1,178 +1,197 @@
-// import { FaCartPlus, FaStar } from "react-icons/fa";
-// import { useCart } from "../../context/CartContext";
-// import { useState } from "react";
+import { FaCartPlus, FaStar } from "react-icons/fa";
+import { useCart } from "../../context/CartContext";
+import Image from "next/image";
 
-// interface Review {
-//   rating: number;
-//   comment: string;
-//   reviewer: string; // Add reviewer name
-// }
+interface Review {
+  user_name: string;
+  review: string;
+  rating: number;
+  created_at: string;
+}
 
-// interface ProductDetailCardProps {
-//   id: number;
-//   product_name: string;
-//   price: number;
-//   product_desc: string;
-//   category: string;
-//   eco_point: number;
-//   recycle_material: number;
-//   stock: number;
-//   images?: string[]; // Optional: Array of image URLs
-//   reviews?: Review[]; // Optional: Array of reviews
-// }
+interface ProductDetailCardProps {
+  id: number;
+  product_name: string;
+  price: number;
+  product_desc: string;
+  category: string;
+  eco_point: number;
+  recycle_material: number;
+  stok: number;
+  image_url: string;
+  discount?: number;
+  reviews: {
+    average_rating: number | null;
+    total_reviews: number;
+    reviews: Review[];
+  };
+}
 
-// const ProductDetailCard = ({
-//   id,
-//   product_name,
-//   category,
-//   product_desc,
-//   price,
-//   images = [], // Default to an empty array if undefined
-//   eco_point,
-//   recycle_material,
-//   stock,
-//   reviews = [], // Default to an empty array if undefined
-// }: ProductDetailCardProps) => {
-//   const { addToCart } = useCart();
-//   const [selectedImage, setSelectedImage] = useState(images.length > 0 ? images[0] : ""); // Default to the first image or empty string
+const ProductDetailCard = ({
+  id,
+  product_name,
+  category,
+  product_desc,
+  price,
+  image_url,
+  eco_point,
+  recycle_material,
+  stok,
+  discount,
+  reviews,
+}: ProductDetailCardProps) => {
+  const { addToCart } = useCart();
 
-//   // const handleAddToCart = () => {
-//   //   const item = {
-//   //     id,
-//   //     product_id: id,
-//   //     product_name: product_name,
-//   //     total_price: price,
-//   //     quantity: 1,
-//   //     imageUrl: selectedImage,
-//   //   };
-//   //   addToCart(item);
-//   // };
+  const handleAddToCart = () => {
+    const item = {
+      id,
+      product_id: id,
+      product_name: product_name,
+      total_price: price,
+      quantity: 1,
+      image_url: image_url,
+    };
+    addToCart(item);
+  };
 
-//   const averageRating =
-//     reviews.length > 0
-//       ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1)
-//       : null;
+  const images = image_url ? image_url.split(";") : [];
 
-//   return (
-//     <section className="max-w-screen-lg mx-auto p-6 bg-white shadow-md rounded-lg">
-//       {/* Main Layout */}
-//       <div className="flex flex-col lg:flex-row gap-8">
-//         {/* Image Gallery */}
-//         <div className="lg:w-1/2">
-//           <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center">
-//             {selectedImage ? (
-//               <img
-//                 src={selectedImage}
-//                 alt={product_name}
-//                 className="object-contain max-h-full"
-//               />
-//             ) : (
-//               <p className="text-gray-400">No Image Available</p>
-//             )}
-//           </div>
-//           {images.length > 0 && (
-//             <div className="flex space-x-2 mt-4 overflow-x-auto">
-//               {images.map((img, index) => (
-//                 <img
-//                   key={index}
-//                   src={img}
-//                   alt={`Thumbnail ${index + 1}`}
-//                   className={`w-20 h-20 object-cover rounded-md cursor-pointer ${
-//                     selectedImage === img ? "ring-2 ring-green-500" : "ring-1 ring-gray-300"
-//                   }`}
-//                   onClick={() => setSelectedImage(img)}
-//                 />
-//               ))}
-//             </div>
-//           )}
-//         </div>
+  const discountedPrice = discount ? price - (price * discount) / 100 : price;
 
-//         {/* Product Details */}
-//         <div className="lg:w-1/2">
-//           <h1 className="text-3xl font-semibold text-gray-800">{product_name}</h1>
-//           <p className="mt-2 text-sm text-gray-500">{category}</p>
+  return (
+    <section className="max-w-screen-xl mx-auto p-6">
+      {/* Product Details Section */}
+      <div className="flex flex-col lg:flex-row items-center justify-between bg-white shadow-lg rounded-lg overflow-hidden">
+        {/* Image Section */}
+        <div className="lg:w-1/2 px-4">
+          <div className="flex flex-col gap-4">
+            {images.length > 0 && (
+              <Image
+                src={images[0]}
+                alt={`${product_name} main image`}
+                className="rounded-lg"
+                layout="responsive"
+                width={250}
+                height={250}
+              />
+            )}
+            <div className="flex gap-2 overflow-x-auto">
+              {images.map((url, index) => (
+                <div key={index} className="w-20 h-20 flex-shrink-0">
+                  <Image
+                    src={url}
+                    alt={`${product_name} image ${index + 1}`}
+                    className="rounded-lg object-cover"
+                    layout="fixed"
+                    width={80}
+                    height={80}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-//           {/* Price */}
-//           <p className="mt-4 text-2xl font-bold text-green-600">
-//             Rp {price}
-//           </p>
+        {/* Product Info Section */}
+        <div className="lg:w-1/2 p-6">
+          <h1 className="text-3xl font-bold text-gray-800 text-center lg:text-left">{product_name}</h1>
+          {reviews?.average_rating && (
+            <div className="flex items-center justify-center lg:justify-start space-x-2 text-yellow-500 mt-2">
+              <FaStar />
+              <span className="text-lg font-medium">
+                {reviews.average_rating.toFixed(1)} / 5
+              </span>
+            </div>
+          )}
+          <p className="text-sm text-gray-500 mt-2 text-center lg:text-left">{category}</p>
+          {discount ? (
+            <div className="mt-4 text-center lg:text-left">
+              <p className="text-lg font-semibold text-red-500 line-through">
+                Rp.{new Intl.NumberFormat("id-ID").format(price)}
+              </p>
+              <p className="text-2xl font-semibold text-[#56B280]">
+                Rp.{new Intl.NumberFormat("id-ID").format(discountedPrice)}
+              </p>
+            </div>
+          ) : (
+            <p className="text-2xl font-semibold text-[#56B280] mt-4 text-center lg:text-left">
+              Rp.{new Intl.NumberFormat("id-ID").format(price)}
+            </p>
+          )}
+          <p className="text-gray-600 mt-4 text-center lg:text-left">{product_desc}</p>
 
-//           {/* Product Details */}
-//           <div className="mt-4 space-y-2">
-//             <p className="text-gray-700">
-//               <strong>Eco Points:</strong> {eco_point}
-//             </p>
-//             <p className="text-gray-700">
-//               <strong>Recycle Material:</strong> {recycle_material}%
-//             </p>
-//             <p className="text-gray-700">
-//               <strong>Stock:</strong> {stock > 0 ? stock : "Out of Stock"}
-//             </p>
-//             <p className="text-gray-700">{product_desc}</p>
-//           </div>
+          <div className="mt-4 text-center lg:text-left">
+            <p className="text-gray-600 text-sm">
+              <strong>Eco Points:</strong> {eco_point}
+            </p>
+            <p className="text-gray-600 text-sm">
+              <strong>Recycle Material:</strong> {recycle_material}%
+            </p>
+            <p className="text-gray-600 text-sm">
+              <strong>Stock:</strong> {stok > 0 ? stok : "Out of stock"}
+            </p>
+          </div>
 
-//           {/* Reviews and Ratings */}
-//           <div className="mt-6">
-//             <div className="flex items-center space-x-2">
-//               <FaStar className="text-yellow-400" />
-//               {averageRating ? (
-//                 <span className="text-gray-700">
-//                   {averageRating} ({reviews.length}{" "}
-//                   {reviews.length > 1 ? "reviews" : "review"})
-//                 </span>
-//               ) : (
-//                 <span className="text-gray-500">No reviews yet</span>
-//               )}
-//             </div>
-//           </div>
+          <button
+            onClick={handleAddToCart}
+            className="flex items-center justify-center mt-6 bg-[#56B280] text-white text-lg font-medium py-2 px-6 rounded-lg hover:bg-[#070707] hover:shadow-md transition"
+            disabled={stok <= 0}
+          >
+            <FaCartPlus className="mr-2" /> Add to Cart
+          </button>
+        </div>
+      </div>
 
-//           {/* Add to Cart Button */}
-//           <button
-//             className="mt-6 py-3 px-6 w-full lg:w-auto bg-green-500 text-white text-lg rounded-lg shadow hover:bg-green-600 flex items-center justify-center"
-//             onClick={handleAddToCart}
-//             disabled={stock === 0}
-//           >
-//             <FaCartPlus className="mr-2" /> Add to Cart
-//           </button>
-//         </div>
-//       </div>
+      {/* Reviews Section */}
+      <div className="mt-8">
+        <h2 className="text-2xl font-bold text-gray-800">Reviews</h2>
+        <div className="mt-4">
+          {/* Average Rating */}
+          {reviews?.average_rating !== null && reviews?.average_rating !== undefined ? (
+            <div className="flex items-center space-x-2 text-yellow-500">
+              <FaStar />
+              <span className="text-lg font-medium">
+                {reviews.average_rating} / 5
+              </span>
+              <span className="text-gray-500">
+                ({reviews.total_reviews} reviews)
+              </span>
+            </div>
+          ) : (
+            <p className="text-gray-500">No reviews yet</p>
+          )}
+        </div>
 
-//       {/* Reviews Section */}
-//       {reviews.length > 0 && (
-//         <div className="mt-12">
-//           <h2 className="text-xl font-semibold text-gray-800 mb-4">Customer Reviews</h2>
-//           <div className="space-y-4">
-//             {reviews.map((review, index) => (
-//               <div
-//                 key={index}
-//                 className="p-4 bg-gray-100 rounded-lg shadow-md flex items-start space-x-4"
-//               >
-//                 <div className="flex items-center justify-center w-12 h-12 bg-green-500 text-white rounded-full">
-//                   {review.reviewer[0].toUpperCase()}
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-gray-800">
-//                     <strong>{review.reviewer}</strong>
-//                   </p>
-//                   <p className="text-sm text-gray-600">{review.comment}</p>
-//                   <div className="flex items-center mt-1">
-//                     {[...Array(5)].map((_, i) => (
-//                       <FaStar
-//                         key={i}
-//                         className={`mr-1 ${
-//                           i < review.rating ? "text-yellow-400" : "text-gray-300"
-//                         }`}
-//                       />
-//                     ))}
-//                   </div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       )}
-//     </section>
-//   );
-// };
+        {/* Individual Reviews */}
+        <div className="mt-6 space-y-4">
+          {reviews?.reviews?.length > 0 ? (
+            reviews.reviews.map((review, index) => (
+              <div
+                key={index}
+                className="bg-gray-50 p-4 rounded-lg shadow-md border"
+              >
+                <div className="flex justify-between">
+                  <p className="font-semibold text-gray-800">{review.user_name}</p>
+                  <p className="text-yellow-500 flex items-center">
+                    {Array.from({ length: review.rating }, (_, i) => (
+                      <FaStar key={i} className="text-yellow-500 text-sm" />
+                    ))}
+                  </p>
+                </div>
+                <p className="text-gray-600 text-sm mt-1">{review.review}</p>
+                <p className="text-gray-400 text-xs mt-2">
+                  {new Date(review.created_at).toLocaleDateString("id-ID")}
+                </p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No reviews available</p>
+          )}
+        </div>
+      </div>
 
-// export default ProductDetailCard;
+    </section>
+  );
+};
+
+export default ProductDetailCard;

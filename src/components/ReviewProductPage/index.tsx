@@ -13,15 +13,15 @@ const ReviewProductPage: React.FC<{ products: Product[] }> = ({ products }) => {
     [key: number]: { rating: number | null; text: string };
   }>({});
 
-  const handleRatingChange = (productId: number, rating: number) => {
-    setReviews((prev) => {
-      const currentRating = prev[productId]?.rating;
-      return {
-        ...prev,
-        [productId]: { ...prev[productId], rating: currentRating === rating ? null : rating },
-      };
-    });
-  };
+  // const handleRatingChange = (productId: number, rating: number) => {
+  //   setReviews((prev) => {
+  //     const currentRating = prev[productId]?.rating;
+  //     return {
+  //       ...prev,
+  //       [productId]: { ...prev[productId], rating: currentRating === rating ? null : rating },
+  //     };
+  //   });
+  // };
 
   const handleTextChange = (productId: number, text: string) => {
     setReviews((prev) => ({
@@ -94,13 +94,12 @@ const ReviewProductPage: React.FC<{ products: Product[] }> = ({ products }) => {
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <span
-                    key={star}
-                    className={`cursor-pointer text-3xl ${
-                      reviews[product.product_id]?.rating && star <= reviews[product.product_id].rating
-                        ? "text-yellow-500"
-                        : "text-gray-300"
-                    }`}
-                    onClick={() => handleRatingChange(product.product_id, star)}
+                  key={star}
+                  className={`cursor-pointer text-3xl ${
+                    star <= (reviews?.[product.product_id]?.rating ?? 0)
+                      ? "text-yellow-500"
+                      : "text-gray-300"
+                  }`}
                   >
                     ★
                   </span>

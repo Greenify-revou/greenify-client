@@ -125,7 +125,7 @@ const VerificationForm = ({ email, onNext }: VerificationFormProps) => {
           onClick={resendOTPCode}
           className="text-blue-500 hover:underline"
         >
-          Didn't get the code? Resend Code
+          Didn&apos;t get the code? Resend Code
         </button>
       </div>
     </form>

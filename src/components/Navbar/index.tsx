@@ -4,7 +4,6 @@ import { FaShoppingCart } from "react-icons/fa";
 import Link from "next/link";
 import SearchBar from "../SearchBar";
 import { useAuth } from "@/src/context/AuthContext";
-import { BiLogoUnity } from "react-icons/bi";
 import { useRouter } from "next/router";
 import { API_CART_CHECKOUT } from "@/src/constants/api";
 

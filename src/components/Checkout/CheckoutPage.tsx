@@ -1,6 +1,6 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import CartItem from "./CartItem";
-import { API_ADD_VOUCHER, API_CART_ITEMS, API_ORDER_ITEMS, API_PAYMENT } from "@/src/constants/api";
+import { API_ADD_VOUCHER, API_ORDER_ITEMS, API_PAYMENT } from "@/src/constants/api";
 import { useRouter } from "next/router";
 
 interface OrderItem {
@@ -20,8 +20,10 @@ interface CheckoutPageProps {
 const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
-  const [shippingFee, setShippingFee] = useState(7000); 
-  const [insuranceFee, setInsuranceFee] = useState(800); 
+  // const [shippingFee, setShippingFee] = useState(7000); 
+  // const [insuranceFee, setInsuranceFee] = useState(800); 
+  const shippingFee = 7000;
+  const insuranceFee = 800;
   const [useInsurance, setUseInsurance] = useState(true);
   const [total, setTotal] = useState(0);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
