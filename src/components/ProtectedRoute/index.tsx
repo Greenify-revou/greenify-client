@@ -11,9 +11,10 @@ const ProtectedRoute = ({children}: ProtectedRouteProps) => {
     const router = useRouter()
 
     useEffect(() => {
-        if (!isAuthenticated) {
-            router.push('/login')
-        }
+      const token = localStorage.getItem('access_token')
+      if (!isAuthenticated && !token) {
+          router.push('/login')
+      }
     }, [isAuthenticated])
 
   return (

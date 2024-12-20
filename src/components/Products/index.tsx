@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ProductCard from "./ProductCard";
 import useFetch from "@/src/hooks/useFetch";
-import { API_PRODUCT } from "@/src/constants/api";
+import { API_ALL_PRODUCT } from "@/src/constants/api";
 
 // Product Mock Up Models
 const products_item = Array.from({ length: 50 }, (_, i) => ({
@@ -37,7 +37,7 @@ interface Response {
 }
 
 const Products = () => {
-    const { data, loading, error } = useFetch<Response>({ endpoint: API_PRODUCT })
+    const { data, loading, error } = useFetch<Response>({ endpoint: API_ALL_PRODUCT })
 
     const products = data?.data || [];
 

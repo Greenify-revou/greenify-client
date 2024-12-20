@@ -19,10 +19,11 @@ const ProductDetailCard = ({ id, product_name, category, product_desc, price, im
   const handleAddToCart = () => {
     const item = {
       id,
-      name: product_name,
-      price: price,
+      product_id: id,
+      product_name: product_name,
+      total_price: price,
       quantity: 1,
-      imageUrl: image
+      image_url: image
     };
     addToCart(item);
   };
