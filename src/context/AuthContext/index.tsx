@@ -1,13 +1,24 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { API_ME, API_LOGIN } from "../../constants/api";
+import { set } from "react-hook-form";
 
 // Define types for user data and AuthContext
+interface Address {
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  phone_number: string;
+}
+
 interface User {
   id: number;
   name: string;
   email: string;
   dateofbirth: string;
   gender: string;
+  phone_number: string;
+  address: Address[];
 }
 
 interface AuthContextType {
@@ -16,6 +27,7 @@ interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => void;
   logout: () => void;
+  updateUser: (updatedUserData: Partial<User>) => Promise<void>;
 }
 
 // Create the AuthContext
@@ -97,16 +109,45 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("access_token");
     setUser(null);
   };
-
-  // Authentication check
+  
+  // isAuthenticate check
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
+      fetchUserProfile();
       setIsAuthenticated(true);
     } else {
       setIsAuthenticated(false);
     }
   }, []);
+
+  const updateUser = async (updatedUserData: Partial<User>) => {
+    try {
+      const response = await fetch(API_ME, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(updatedUserData),
+      });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        throw new Error(`Update user failed: ${json.message}`);
+      }
+
+      // Update the local user state with the new data
+      setUser((prevUser) => ({
+        ...prevUser!,
+        ...updatedUserData,
+      }));
+    } catch (error) {
+      console.error(error);
+      throw new Error("Failed to update user");
+    }
+  };
 
   return (
     <AuthContext.Provider
@@ -115,7 +156,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         login,
         logout,
         loading,
-        isAuthenticated
+        isAuthenticated,
+        updateUser
       }}
     >
       {children}

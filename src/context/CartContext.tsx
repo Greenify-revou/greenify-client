@@ -15,6 +15,9 @@ interface CartItem {
 // Interface untuk CartContext
 interface CartContextType {
   cartItems: CartItem[];
+  loading: boolean;
+  error: string | null;
+  clearCart: () => void;
   addToCart: (item: CartItem) => void;
   removeFromCart: (id: number) => void;
   updateQuantity: (id: number, quantityChange: number) => void;
@@ -39,32 +42,56 @@ export const useCart = () => {
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Retrieve access token from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("access_token");
       setAccessToken(token);
     }
-  }, [accessToken]);
+  }, []);
 
-  // Memoize headers to prevent infinite re-renders
+  // Memoize headers to prevent unnecessary re-renders
   const headers = useMemo(() => {
     if (!accessToken) return undefined;
     return { Authorization: `Bearer ${accessToken}` };
   }, [accessToken]);
 
-  const { data, error, loading } = useFetch<Response>({
-    endpoint: API_CART_ITEMS,
-    headers,
-  });
+  // Fetch cart items
+  const fetchCartItems = async () => {
+    if (!headers) return;
 
-  // Avoid fetching if accessToken is not available yet
-  useEffect(() => {
-    if (data) {
-      setCartItems(data.data);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(API_CART_ITEMS, {
+        method: "GET",
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error fetching cart items: ${response.statusText}`);
+      }
+
+      const result: { data: CartItem[] } = await response.json();
+      setCartItems(result.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      console.error("Failed to fetch cart items:", err);
+    } finally {
+      setLoading(false);
     }
-  }, [data]);
+  };
 
+  // Trigger fetch when `accessToken` changes
+  useEffect(() => {
+    if (headers) {
+      fetchCartItems();
+    }
+  }, [headers]);
 
   const addToCart = async (item: CartItem) => {
     setCartItems((prevItems) => {
@@ -176,10 +203,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Failed to update quantity on the server:", error);
     }
   };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
   
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider value={{ cartItems, loading, error, clearCart, addToCart, removeFromCart, updateQuantity }}>
       {children}
     </CartContext.Provider>
   );

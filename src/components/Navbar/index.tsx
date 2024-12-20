@@ -5,11 +5,14 @@ import Link from "next/link";
 import SearchBar from "../SearchBar";
 import { useAuth } from "@/src/context/AuthContext";
 import { BiLogoUnity } from "react-icons/bi";
+import { useRouter } from "next/router";
+import { API_CART_CHECKOUT } from "@/src/constants/api";
 
 const Navbar = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, clearCart,removeFromCart, updateQuantity } = useCart();
   const [cartCount, setCartCount] = useState<number>(0);
   const { isAuthenticated, logout } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     setCartCount(cartItems.reduce((acc, item) => acc + item.quantity, 0));
@@ -18,6 +21,29 @@ const Navbar = () => {
   const handleIncrease = (itemId: number) => updateQuantity(itemId, 1);
   const handleDecrease = (itemId: number) => updateQuantity(itemId, -1);
   const handleRemove = (itemId: number) => removeFromCart(itemId);
+
+  const handleCheckout = async () => {
+      try {
+        const response = await fetch(API_CART_CHECKOUT, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+        
+        router.push(`/checkout/${data.data.id}`);
+        clearCart();
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
   return (
     <nav className="bg-white shadow-md p-4 sticky top-0 z-50">
@@ -93,11 +119,12 @@ const Navbar = () => {
               {/* Checkout Button */}
               {cartItems.length > 0 && (
                 <div className="mt-4">
-                  <Link href="/checkout" passHref>
-                    <button className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition">
-                      Go to Checkout
-                    </button>
-                  </Link>
+                  <button 
+                    className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
+                    onClick={handleCheckout}
+                  >
+                    Go to Checkout
+                  </button>
                 </div>
               )}
             </div>

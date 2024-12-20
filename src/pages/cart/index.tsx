@@ -3,9 +3,10 @@ import { useCart } from "../../context/CartContext";
 import Link from "next/link";
 import { API_CART_CHECKOUT} from "@/src/constants/api";
 import { useRouter } from "next/router";
+import { clear } from "console";
 
 const CartPage = () => {
-  const { cartItems, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, loading, clearCart, removeFromCart, updateQuantity } = useCart();
   const [orderId, setOrderId] = useState<number>(0);
   const router = useRouter();
 
@@ -38,7 +39,7 @@ const CartPage = () => {
       const data = await response.json();
       
       router.push(`/checkout/${data.data.id}`);
-      
+      clearCart();
     } catch (error) {
       console.error(error);
     }
@@ -46,13 +47,13 @@ const CartPage = () => {
 
   useEffect(() => {
     console.log("Cart Items:", cartItems);
-  }, [handleIncrease, handleDecrease, handleRemove]);
+  }, [cartItems,handleIncrease, handleDecrease, handleRemove]);
 
   return (
     <section className="max-w-screen-lg mx-auto py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Your Shopping Cart</h1>
 
-      {cartItems.length === 0 ? (
+      {cartItems.length === 0 && !loading ? (
         <p className="text-gray-600">Your cart is empty. Go shop some products!</p>
       ) : (
         <>
