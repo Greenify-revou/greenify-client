@@ -7,7 +7,7 @@ import { ProductProps } from "@/src/components/Products/ProductCard";
 
 
 interface ProductDetailModel extends ProductProps{
-    stok : number;
+    stock : number;
 }
 interface Response {
     data: ProductDetailModel;
@@ -54,7 +54,7 @@ const ProductDetailPage = () => {
         category: product.category_name,
         eco_point: product.eco_point,
         recycle_material: product.recycle_material,
-        stok: product.stok,
+        stock: product.stock,
         image_url: product.image_url, // Renaming `image` to `image_url`
         reviews: {
             average_rating: product.reviews?.average_rating || null, // Ensure `average_rating` exists or set to null
