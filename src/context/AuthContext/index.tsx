@@ -29,6 +29,7 @@ interface AuthContextType {
   login: (email: string, password: string) => void;
   logout: () => void;
   updateUser: (updatedUserData: Partial<User>) => Promise<void>;
+  fetchUserProfile: () => Promise<void>;
 }
 
 // Create the AuthContext
@@ -158,7 +159,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         logout,
         loading,
         isAuthenticated,
-        updateUser
+        updateUser,
+        fetchUserProfile
       }}
     >
       {children}

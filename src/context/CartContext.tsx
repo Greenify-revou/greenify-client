@@ -91,7 +91,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (headers) {
       fetchCartItems();
     }
-  }, [headers]);
+  }, []);
 
   const addToCart = async (item: CartItem) => {
     setCartItems((prevItems) => {

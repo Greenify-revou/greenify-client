@@ -28,7 +28,7 @@ interface PersonalProfileProps {
 
 const ProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"profile" | "address">("profile");
-  const { user } = useAuth();
+  const { user, fetchUserProfile } = useAuth();
 
   if (!user) {
     return <div>Loading...</div>;
@@ -38,7 +38,10 @@ const ProfilePage: React.FC = () => {
     setActiveTab(tab);
   };
 
-  
+  const handleAddressUpdate = async () => {
+    await fetchUserProfile(); // Refetch the user data to update the address list
+  };
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
@@ -61,7 +64,11 @@ const ProfilePage: React.FC = () => {
         </button>
       </div>
 
-      {activeTab === "profile" ? <PersonalProfile user={user} /> : <AddressList addresses={user?.addresses} />}
+      {activeTab === "profile" ? (
+        <PersonalProfile user={user} />
+      ) : (
+        <AddressList addresses={user?.addresses} onAddressChange={handleAddressUpdate} />
+      )}
     </div>
   );
 };
@@ -167,7 +174,10 @@ const PersonalProfile: React.FC<PersonalProfileProps> = ({ user }) => {
   );
 };
 
-const AddressList: React.FC<{ addresses: Address[] | undefined }> = ({ addresses }) => {
+const AddressList: React.FC<{
+  addresses: Address[] | undefined;
+  onAddressChange: () => void;
+}> = ({ addresses, onAddressChange }) => {
   const [isAddAddressModalOpen, setAddAddressModalOpen] = useState(false);
   const [isEditAddressModalOpen, setEditAddressModalOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
@@ -214,15 +224,24 @@ const AddressList: React.FC<{ addresses: Address[] | undefined }> = ({ addresses
         </div>
       ))}
 
-      {isAddAddressModalOpen && <AddAddressModal onClose={toggleAddAddressModal} />}
+      {isAddAddressModalOpen && (
+        <AddAddressModal onClose={toggleAddAddressModal} onSuccess={onAddressChange} />
+      )}
       {isEditAddressModalOpen && selectedAddress && (
-        <EditAddressModal address={selectedAddress} onClose={() => toggleEditAddressModal()} />
+        <EditAddressModal
+          address={selectedAddress}
+          onClose={() => toggleEditAddressModal()}
+          onSuccess={onAddressChange}
+        />
       )}
     </div>
   );
 };
 
-const AddAddressModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+const AddAddressModal: React.FC<{ onClose: () => void; onSuccess: () => void }> = ({
+  onClose,
+  onSuccess,
+}) => {
   const [formData, setFormData] = useState<Address>({
     name_address: "",
     address: "",
@@ -244,7 +263,7 @@ const AddAddressModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
         },
         body: JSON.stringify(formData),
       });
@@ -252,14 +271,16 @@ const AddAddressModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       if (response.ok) {
         alert("Address added successfully!");
         onClose();
+        onSuccess(); // Trigger the callback to update addresses
       } else {
         alert("Failed to add address.");
       }
     } catch (error) {
       console.error(error);
       alert("Error while adding address.");
-    } 
+    }
   };
+
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
@@ -333,9 +354,10 @@ const AddAddressModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   );
 };
 
-const EditAddressModal: React.FC<{ address: Address; onClose: () => void }> = ({
+const EditAddressModal: React.FC<{ address: Address; onClose: () => void; onSuccess: () => void }> = ({
   address,
   onClose,
+  onSuccess,
 }) => {
   const [formData, setFormData] = useState({
     address: address.address || "",
@@ -365,6 +387,7 @@ const EditAddressModal: React.FC<{ address: Address; onClose: () => void }> = ({
 
       if (response.ok) {
         alert("Address updated successfully!");
+        onSuccess();
         onClose();
       } else {
         alert("Failed to update address.");
