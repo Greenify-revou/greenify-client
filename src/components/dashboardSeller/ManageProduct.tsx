@@ -142,30 +142,37 @@ const ManageProducts = () => {
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
-
+    
         setUploading(true);
         const formData = new FormData();
         formData.append("key", "fc83cc32be937c536fe6b2af550feeea"); // Replace with your API Key
         formData.append("image", file);
-
+    
         try {
             const response = await fetch("https://api.imgbb.com/1/upload", {
                 method: "POST",
                 body: formData,
             });
             const data = await response.json();
-
+    
             if (data?.data?.url) {
-                setForm({ ...form, image_url: data.data.url });
+                // Fix the URL before updating the form
+                const fixedUrl = fixImageUrl(data.data.url);
+                setForm({ ...form, image_url: fixedUrl });
                 Swal.fire("Success", "Image uploaded successfully!", "success");
             } else {
                 Swal.fire("Error", "Failed to upload image", "error");
             }
-        } catch{
+        } catch {
             Swal.fire("Error", "Failed to upload image", "error");
         } finally {
             setUploading(false);
         }
+    };
+    
+    // Fix URL Function
+    const fixImageUrl = (url: string): string => {
+        return url.replace('https://i.ibb.co/', 'https://i.ibb.co.com/');
     };
 
     // Search Functionality

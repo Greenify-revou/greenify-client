@@ -14,15 +14,15 @@ interface Address {
   phone_number: string;
 }
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  dateofbirth: string;
-  gender: string;
-  phone_number: string;
-  addresses: Address[];
-}
+// interface User {
+//   id: number;
+//   name: string;
+//   email: string;
+//   dateofbirth: string;
+//   gender: string;
+//   phone_number: string;
+//   addresses: Address[];
+// }
 
 interface OrderItem {
   id: number;
