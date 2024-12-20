@@ -17,7 +17,7 @@ interface ProductDetailCardProps {
   category: string;
   eco_point: number;
   recycle_material: number;
-  stok: number;
+  stock: number;
   image_url: string;
   discount?: number;
   reviews: {
@@ -36,7 +36,7 @@ const ProductDetailCard = ({
   image_url,
   eco_point,
   recycle_material,
-  stok,
+  stock,
   discount,
   reviews,
 }: ProductDetailCardProps) => {
@@ -57,6 +57,8 @@ const ProductDetailCard = ({
   const images = image_url ? image_url.split(";") : [];
 
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
+
+  console.log(stock)
 
   return (
     <section className="max-w-screen-xl mx-auto p-6">
@@ -128,14 +130,14 @@ const ProductDetailCard = ({
               <strong>Recycle Material:</strong> {recycle_material}%
             </p>
             <p className="text-gray-600 text-sm">
-              <strong>Stock:</strong> {stok > 0 ? stok : "Out of stock"}
+              <strong>Stock:</strong> {stock > 0 ? stock : "Out of stock"}
             </p>
           </div>
 
           <button
             onClick={handleAddToCart}
             className="flex items-center justify-center mt-6 bg-[#56B280] text-white text-lg font-medium py-2 px-6 rounded-lg hover:bg-[#070707] hover:shadow-md transition"
-            disabled={stok <= 0}
+            disabled={stock <= 0}
           >
             <FaCartPlus className="mr-2" /> Add to Cart
           </button>

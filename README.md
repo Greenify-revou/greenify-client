@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Greenify 🌱
+**Reuse What You Can, Recycle What You Can't**
 
-## Getting Started
+---
 
-First, run the development server:
+## 📚 Introduction
+**Greenify** is an e-commerce platform that supports an eco-friendly lifestyle. We aim to connect consumers with **reusable** and **eco-friendly** products, ranging from household needs to everyday items.  
+With **Greenify**, you can:  
+    - Reduce waste.  
+    - Shrink your carbon footprint.  
+    - Create a greener future.  
 
+Sustainable choices are now accessible, practical, and affordable. 🌍  
+
+---
+
+## 🚧 Problems We Solve  
+1. Waste from single-use products.  
+2. Limited access to eco-friendly products.  
+3. Lack of awareness about sustainable living.  
+4. Overpackaging in e-commerce products.  
+5. Insufficient support for local businesses.  
+
+---
+
+## 💡 Our Solution  
+- **Supporting local businesses and communities** to enhance shared prosperity.  
+- **Providing reusable and eco-friendly products** for everyone.  
+- **Integrated platform** to make accessing sustainable products easier.  
+- **Educating consumers** about sustainability through informative content.  
+- **Sustainable packaging** to reduce waste from shipping processes.  
+
+---
+
+## 🌟 Market Opportunity  
+- A broad target market with a growing trend of eco-friendly lifestyles.  
+- A rapidly growing market for **reusable** and **eco-friendly** products.  
+- Government regulations supporting the adoption of sustainable products.  
+
+---
+
+## 🛠️ Tech Stack  
+- **Next.js** - React-based framework for building server-rendered applications.
+- **React** - JavaScript library for building user interfaces.
+- **Tailwind CSS** - A utility-first CSS framework for styling.
+- **TypeScript** - Adds static typing to JavaScript.
+- **Swiper** - A library for creating responsive and customizable sliders.
+- **React Router DOM** - For handling routing within the app.
+- **Yup** - Schema validation library used with forms.
+
+---
+
+## 📂 Repository Overview  
+- **Directory:** Contains frontend code for the Greenify website.  
+- **Framework:** Next.js and React.js.  
+- **Design:** Responsive, modern, and user-friendly.  
+
+---
+
+## 🤝🏻 Contributors  
+| Name               | Role                  |  
+|---------------------|-----------------------|  
+| **Ridzky Sulthan**  | Project Lead & Fullstack Developer |  
+| **Thoriq Afif**     | Fullstack Developer    |  
+| **Samuel Wijaya**   | Frontend Developer     |  
+| **Galuh Baskoro**   | Frontend Developer     |  
+
+---
+
+## 🌐 Visit Us  
+Visit our platform to start your eco-friendly journey:  
+[🌿 Greenify Website](https://greenify.my.id/)  
+
+**Let’s create a greener world together with Greenify! 🌱**
+
+---
+
+## Running the Project
+
+### Prerequisites
+1. Ensure you have **Node.js** (v16 or later) installed on your system.
+2. Install **npm** (comes with Node.js) or **yarn** (optional for frontend dependency management).
+
+---
+
+### Steps to Run
+
+#### 1. Clone the Repositories
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Clone the service repository
+git clone <service-repo-url>
+cd <service-repo-directory>
+
+# Clone the client repository
+git clone <client-repo-url>
+cd <client-repo-directory>
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### 2. Setup and Run the Client (Frontend)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Navigate to the client repository directory:
+   ```bash
+   cd <client-repo-directory>
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. Install dependencies using npm or yarn:
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-## Learn More
+3. Run the development server:
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. The client should now be running on [http://localhost:3000](http://localhost:3000).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Notes
+- Ensure both the client and service are running concurrently for the project to function correctly.
+- Update any environment variables or configurations as required for your local setup.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

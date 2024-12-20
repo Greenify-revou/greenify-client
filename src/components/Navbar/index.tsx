@@ -5,44 +5,125 @@ import Link from "next/link";
 import SearchBar from "../SearchBar";
 import { useAuth } from "@/src/context/AuthContext";
 import { useRouter } from "next/router";
-import { API_CART_CHECKOUT } from "@/src/constants/api";
+import Image from "next/image";
+import {
+  API_CART_CHECKOUT,
+  API_SELLER_PROFILE,
+  API_ME,
+} from "@/src/constants/api";
+
+interface Profile {
+  id: number;
+  name: string;
+  email: string;
+  phone_number: string;
+  gender: string;
+  dateofbirth: string;
+  profile_picture: string | null;
+  roles: { id: number; rolename: string }[];
+}
+
+interface SellerProfile {
+  id: number;
+  address: string;
+  phone_number: string;
+  store_description: string;
+  store_logo: string | null;
+  store_name: string;
+  user_id: number;
+}
 
 const Navbar = () => {
-  const { cartItems, clearCart,removeFromCart, updateQuantity } = useCart();
+  const { cartItems, clearCart, removeFromCart, updateQuantity } = useCart();
   const [cartCount, setCartCount] = useState<number>(0);
   const { isAuthenticated, logout } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [sellerProfile, setSellerProfile] = useState<SellerProfile | null>(
+    null
+  );
+  const [loadingProfile, setLoadingProfile] = useState<boolean>(true);
   const router = useRouter();
 
   useEffect(() => {
     setCartCount(cartItems.reduce((acc, item) => acc + item.quantity, 0));
   }, [cartItems]);
 
-  const handleIncrease = (itemId: number) => updateQuantity(itemId, 1);
-  const handleDecrease = (itemId: number) => updateQuantity(itemId, -1);
-  const handleRemove = (itemId: number) => removeFromCart(itemId);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!isAuthenticated) return;
 
-  const handleCheckout = async () => {
       try {
-        const response = await fetch(API_CART_CHECKOUT, {
-          method: "POST",
+        setLoadingProfile(true);
+
+        // Fetch user profile
+        const userResponse = await fetch(API_ME, {
+          method: "GET",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
         });
-  
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch profile data");
         }
-  
-        const data = await response.json();
-        
-        router.push(`/checkout/${data.data.id}`);
-        clearCart();
+        const userData = await userResponse.json();
+        setProfile(userData.data);
+
+        // Fetch seller profile
+        const sellerResponse = await fetch(API_SELLER_PROFILE, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+
+        if (sellerResponse.ok) {
+          const sellerData = await sellerResponse.json();
+          setSellerProfile(sellerData.data);
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching profile or seller profile:", error);
+      } finally {
+        setLoadingProfile(false);
       }
     };
+
+    fetchProfile();
+  }, [isAuthenticated]);
+
+  const handleIncrease = (itemId: number) => {
+    updateQuantity(itemId, 1);
+  };
+
+  const handleDecrease = (itemId: number) => {
+    updateQuantity(itemId, -1);
+  };
+
+  const handleRemove = (itemId: number) => {
+    removeFromCart(itemId);
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const response = await fetch(API_CART_CHECKOUT, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      router.push(`/checkout/${data.data.id}`);
+      clearCart();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <nav className="bg-white shadow-md p-4 sticky top-0 z-50">
@@ -50,18 +131,22 @@ const Navbar = () => {
         {/* Logo */}
         <div>
           <Link href="/" passHref>
-            <img src="greenify-newlogo.png" alt="brand-logo" width={100} height={40} />
+            <Image
+              src="/greenify-newlogo.png"
+              alt="brand-logo"
+              width={100}
+              height={40}
+            />
           </Link>
         </div>
 
         {/* Search Bar */}
         <SearchBar />
 
-        {/* Login, Register, Cart */}
+        {/* Cart, Profile */}
         <div className="flex items-center gap-4">
           {/* Cart Dropdown */}
           <div className="relative group">
-            {/* Cart Icon with Link */}
             <Link href="/cart" passHref>
               <div className="flex items-center gap-2 cursor-pointer relative">
                 <FaShoppingCart size={24} />
@@ -80,11 +165,22 @@ const Navbar = () => {
               ) : (
                 <div className="max-h-60 overflow-y-auto">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="flex justify-between mb-2 items-center">
+                    <div
+                      key={item.id}
+                      className="flex justify-between mb-2 items-center"
+                    >
                       {/* Product Image and Name */}
                       <div className="flex items-center gap-3">
-                        <img src={item.image_url} alt={item.product_name} width={40} height={40} className="object-cover" />
-                        <span className="block text-sm font-semibold">{item.product_name}</span>
+                        <Image
+                          src={item.image_url}
+                          alt={item.product_name}
+                          width={40}
+                          height={40}
+                          className="object-cover"
+                        />
+                        <span className="block text-sm font-semibold">
+                          {item.product_name}
+                        </span>
                       </div>
 
                       {/* Quantity Controls */}
@@ -96,7 +192,9 @@ const Navbar = () => {
                         >
                           -
                         </button>
-                        <span className="text-sm font-semibold">{item.quantity}</span>
+                        <span className="text-sm font-semibold">
+                          {item.quantity}
+                        </span>
                         <button
                           className="px-2 py-1 bg-gray-200 rounded"
                           onClick={() => handleIncrease(item.id)}
@@ -118,7 +216,7 @@ const Navbar = () => {
               {/* Checkout Button */}
               {cartItems.length > 0 && (
                 <div className="mt-4">
-                  <button 
+                  <button
                     className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition"
                     onClick={handleCheckout}
                   >
@@ -128,19 +226,64 @@ const Navbar = () => {
               )}
             </div>
           </div>
-          
+
           {isAuthenticated ? (
-            // If authenticated, show logout button
-            <Link href="/login" passHref>
+            <div className="flex items-center gap-4">
+              {/* User Profile */}
+              {loadingProfile ? (
+                <div className="w-8 h-8 rounded-full bg-gray-300 animate-pulse"></div>
+              ) : profile?.profile_picture ? (
+                <Image
+                  src={profile.profile_picture}
+                  alt={profile.name}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 rounded-full cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                />
+              ) : (
+                <div
+                  className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center cursor-pointer"
+                  onClick={() => router.push("/profile")}
+                >
+                  <span className="text-sm text-gray-700">
+                    {profile?.name?.charAt(0) || "?"}
+                  </span>
+                </div>
+              )}
+
+              {/* Seller Profile */}
+              {sellerProfile ? (
+                <div
+                  className="flex items-center gap-2 cursor-pointer"
+                  onClick={() => router.push("/seller-profile")}
+                >
+                  <Image
+                    src={sellerProfile.store_logo || "/default-store-logo.png"}
+                    alt={sellerProfile.store_name}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                  <span>{sellerProfile.store_name}</span>
+                </div>
+              ) : (
+                <button
+                  className="bg-[#56B280] text-white py-2 px-4 rounded hover:bg-[#4c9f67] transition"
+                  onClick={() => router.push("/open-shop")}
+                >
+                  Open Shop
+                </button>
+              )}
+
               <button
-                className="bg-[#56B280] text-white py-2 px-4 rounded hover:bg-[#4c9f67] transition"
-                onClick={() => logout()} // Use onClick for buttons
+                className="bg-[#f82929] text-white py-2 px-4 rounded hover:bg-[#ff6f6f] transition"
+                onClick={() => logout()}
               >
                 Logout
               </button>
-            </Link>
+            </div>
           ) : (
-            // If not authenticated, show login and register buttons
             <div className="flex space-x-4">
               <Link href="/login" passHref>
                 <button className="bg-white text-[#56B280] py-2 px-4 rounded hover:bg-gray-100 transition">

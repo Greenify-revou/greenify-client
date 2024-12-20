@@ -1,4 +1,4 @@
-import { API_CATEGORIES } from '@/src/constants/api'
+import { API_CATEGORY } from '@/src/constants/api'
 import React, { useEffect, useState } from 'react'
 
 interface InterestModel {
@@ -34,7 +34,7 @@ const RegisterInterestForm: React.FC<RegisterInterestFormProps> = ({
   const fetchInterests = async () => {
     try {
       const response = await fetch(
-        API_CATEGORIES
+        API_CATEGORY
       )
       const data = await response.json()
       setInterests(data.data)

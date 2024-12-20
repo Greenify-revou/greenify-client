@@ -1,5 +1,6 @@
 export const API_URL = "https://grieving-ryann-greenify-31e89a90.koyeb.app/api/v1";
 export const API_ME = `${API_URL}/profile/me`;
+export const API_SELLER_PROFILE = `${API_URL}/sellers/profile`;
 export const API_LOGIN = `${API_URL}/auth/login`;
 export const API_EMAIL_VALIDATION = `${API_URL}/users/email-validation`;
 export const API_CHECK_OTP = `${API_URL}/users/otp-validation`;
@@ -24,3 +25,10 @@ export const API_ADD_ADDRESS = `${API_URL}/addresses/add-address`;
 export const API_UPDATE_ADDRESS = `${API_URL}/addresses/update-address`;
 export const API_DELETE_ADDRESS = `${API_URL}/addresses/delete-address`;
 export const API_GET_USER_ADDRESS = `${API_URL}/addresses/get-user-address-by-id`;
+export const API_CREATE_SELLER = `${API_URL}/sellers/create-seller`;
+export const API_GET_ALL_SELLER_PRODUCT = `${API_URL}/sellers/get_all_seller_products`;
+export const API_MANAGE_SELLER_PRODUCT = `${API_URL}/products`;
+export const API_GET_SELLER_VOUCHER = `${API_URL}/sellers/get-seller-vouchers`;
+export const API_CREATE_VOUCHER = `${API_URL}/vouchers/add-voucher`;
+export const API_UPDATE_VOUCHER = `${API_URL}/vouchers/update-voucher`;
+export const GOOD_REVIEW = `${API_URL}/reviews/good-reviews`;

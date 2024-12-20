@@ -2,6 +2,27 @@ import React, { useEffect, useState } from "react";
 import CartItem from "./CartItem";
 import { API_ADD_VOUCHER, API_ORDER_ITEMS, API_PAYMENT } from "@/src/constants/api";
 import { useRouter } from "next/router";
+import { useAuth } from "@/src/context/AuthContext";
+
+interface Address {
+  id?: number;
+  name_address: string;
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  phone_number: string;
+}
+
+// interface User {
+//   id: number;
+//   name: string;
+//   email: string;
+//   dateofbirth: string;
+//   gender: string;
+//   phone_number: string;
+//   addresses: Address[];
+// }
 
 interface OrderItem {
   id: number;
@@ -20,14 +41,15 @@ interface CheckoutPageProps {
 const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [subtotal, setSubtotal] = useState(0);
-  // const [shippingFee, setShippingFee] = useState(7000); 
-  // const [insuranceFee, setInsuranceFee] = useState(800); 
+  const { user } = useAuth();
   const shippingFee = 7000;
   const insuranceFee = 800;
   const [useInsurance, setUseInsurance] = useState(true);
   const [total, setTotal] = useState(0);
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [promoCode, setPromoCode] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(user?.addresses[0] || null);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const router = useRouter();
 
   const fetchOrderItems = async () => {
@@ -53,7 +75,7 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
   };
 
   const calculateTotals = () => {
-    const cartSubtotal = orderItems.reduce((sum, item) => sum + item.total_price * item.quantity, 0);
+    const cartSubtotal = orderItems.reduce((sum, item) => sum + item.total_price * 1, 0);
     setSubtotal(cartSubtotal);
     const finalTotal = cartSubtotal + shippingFee + (useInsurance ? insuranceFee : 0);
     setTotal(finalTotal);
@@ -95,6 +117,10 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
     }
   }
 
+  const toggleAddressModal = () => {
+    setIsAddressModalOpen(!isAddressModalOpen);
+  };
+
   const togglePromoModal = () => {
     setIsPromoModalOpen(!isPromoModalOpen);
   };
@@ -127,6 +153,11 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
       setPromoCode(""); // Reset promo code input
     }
   };
+
+  const selectAddress = (address: Address) => {
+    setSelectedAddress(address);
+    setIsAddressModalOpen(false);
+  };
   
 
   return (
@@ -136,10 +167,52 @@ const CheckoutPage: React.FC<CheckoutPageProps> = ({order_id}) => {
         {/* Delivery Address */}
         <div className="border rounded-md p-4 mb-4">
           <h2 className="font-semibold">Delivery Address</h2>
-          <p className="text-gray-700">Rumah &#x2022; Ridzky</p>
-          <p className="text-gray-500">Jl Jendral Sudirman no.10</p>
-          <button className="text-[#56B280] underline mt-2">Change</button>
+          {selectedAddress === null ? (
+            <p className="text-gray-500">No address selected</p>
+          ) : (
+            <>
+              <p className="text-gray-700">{selectedAddress?.name_address}</p>
+              <p className="text-gray-500">{selectedAddress?.address}</p>
+              <p className="text-gray-500">{selectedAddress?.city}, {selectedAddress?.province}, {selectedAddress?.postal_code}</p>
+              <p className="text-gray-500">Phone: {selectedAddress?.phone_number}</p>
+            </>
+          )}
+          <button onClick={toggleAddressModal} className="text-[#56B280] underline mt-2">
+            Change
+          </button>
         </div>
+
+        {isAddressModalOpen && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-md shadow-lg w-96">
+              <h2 className="font-semibold text-lg mb-4">Select Delivery Address</h2>
+              {user?.addresses && user.addresses.length > 0 ? (
+                user?.addresses.map((address) => (
+                  <div
+                    key={address.id}
+                    className="p-4 border rounded-md mb-2 cursor-pointer hover:bg-gray-100"
+                    onClick={() => selectAddress(address)}
+                  >
+                    <p className="font-medium">{address.name_address}</p>
+                    <p>{address.address}</p>
+                    <p>
+                      {address.city}, {address.province}, {address.postal_code}
+                    </p>
+                    <p>Phone: {address.phone_number}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No addresses found.</p>
+              )}
+              <button
+                onClick={toggleAddressModal}
+                className="w-full mt-4 bg-gray-200 py-2 rounded-md font-bold hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Cart Items */}
         <div className="border rounded-md p-4 mb-4">
