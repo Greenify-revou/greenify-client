@@ -70,6 +70,7 @@ const RegisterPage = () => {
 
       const result = await response.json()
       console.log('Registration successful:', result)
+      router.push('/login')
     } catch (error) {
       console.error('Failed to submit registration data:', error)
     }
