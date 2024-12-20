@@ -40,23 +40,20 @@ Sustainable choices are now accessible, practical, and affordable. 🌍
 ---
 
 ## 🛠️ Tech Stack  
-**Frontend:** React.js, Next.js, TailwindCSS  
-**Backend:** Flask, Python, Flask-SQLAlchemy  
-**Database:** PostgreSQL  
-**Authentication:** OAuth 2.0, JWT  
+- **Next.js** - React-based framework for building server-rendered applications.
+- **React** - JavaScript library for building user interfaces.
+- **Tailwind CSS** - A utility-first CSS framework for styling.
+- **TypeScript** - Adds static typing to JavaScript.
+- **Swiper** - A library for creating responsive and customizable sliders.
+- **React Router DOM** - For handling routing within the app.
+- **Yup** - Schema validation library used with forms.
 
 ---
 
 ## 📂 Repository Overview  
-### `client`  
 - **Directory:** Contains frontend code for the Greenify website.  
 - **Framework:** Next.js and React.js.  
 - **Design:** Responsive, modern, and user-friendly.  
-
-### `service`  
-- **Directory:** Contains backend code for the API and server services.  
-- **Framework:** Flask.  
-- **Key Features:** CRUD operations, payment integration, and user authentication.  
 
 ---
 
