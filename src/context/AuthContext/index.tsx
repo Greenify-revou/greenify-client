@@ -4,7 +4,9 @@ import { set } from "react-hook-form";
 
 // Define types for user data and AuthContext
 interface Address {
+  id : number;
   address: string;
+  name_address: string;
   city: string;
   province: string;
   postal_code: string;
@@ -18,7 +20,7 @@ interface User {
   dateofbirth: string;
   gender: string;
   phone_number: string;
-  address: Address[];
+  addresses: Address[];
 }
 
 interface AuthContextType {

@@ -1,8 +1,10 @@
-import { API_ADD_ADDRESS } from "@/src/constants/api";
+import { API_ADD_ADDRESS, API_UPDATE_ADDRESS } from "@/src/constants/api";
 import { useAuth } from "@/src/context/AuthContext";
 import React, { useState } from "react";
 
 interface Address {
+  id?: number;
+  name_address: string;
   address: string;
   city: string;
   province: string;
@@ -17,7 +19,7 @@ interface User {
   dateofbirth: string;
   gender: string;
   phone_number: string;
-  address: Address[];
+  addresses: Address[];
 }
 
 interface PersonalProfileProps {
@@ -36,18 +38,7 @@ const ProfilePage: React.FC = () => {
     setActiveTab(tab);
   };
 
-  // const addAddress = async () => {
-  //   try {
-  //     const response = await fetch(API_ADD_ADDRESS, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ user_id: user.id }),
-  //     });
-  //     })
-  //   }
-  // };
+  
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
@@ -70,7 +61,7 @@ const ProfilePage: React.FC = () => {
         </button>
       </div>
 
-      {activeTab === "profile" ? <PersonalProfile user={user} /> : <AddressList addresses={user?.address} />}
+      {activeTab === "profile" ? <PersonalProfile user={user} /> : <AddressList addresses={user?.addresses} />}
     </div>
   );
 };
@@ -176,38 +167,285 @@ const PersonalProfile: React.FC<PersonalProfileProps> = ({ user }) => {
   );
 };
 
-interface AddressListProps {
-  addresses: Address[] | undefined;
-}
+const AddressList: React.FC<{ addresses: Address[] | undefined }> = ({ addresses }) => {
+  const [isAddAddressModalOpen, setAddAddressModalOpen] = useState(false);
+  const [isEditAddressModalOpen, setEditAddressModalOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
-const AddressList: React.FC<AddressListProps> = ({ addresses }) => {
+  const toggleAddAddressModal = () => {
+    setAddAddressModalOpen((prev) => !prev);
+  };
+
+  const toggleEditAddressModal = (address?: Address) => {
+    setSelectedAddress(address || null);
+    setEditAddressModalOpen((prev) => !prev);
+  };
 
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+        <button
+          onClick={toggleAddAddressModal}
+          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+        >
           Add New Address
         </button>
       </div>
+
       {addresses?.map((address, index) => (
         <div
           key={index}
           className="border border-gray-300 rounded p-4 mb-4 flex justify-between items-center"
         >
           <div>
-            <p className="font-semibold">{address.address}</p>
+            <p className="font-semibold">{address.name_address}</p>
+            <p>{address.address}</p>
             <p>{address.phone_number}</p>
             <p>
               {address.city}, {address.province}, {address.postal_code}
             </p>
           </div>
-          <button className="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300">
+          <button
+            onClick={() => toggleEditAddressModal(address)}
+            className="bg-gray-200 px-3 py-1 rounded text-sm hover:bg-gray-300"
+          >
             Edit
           </button>
         </div>
       ))}
+
+      {isAddAddressModalOpen && <AddAddressModal onClose={toggleAddAddressModal} />}
+      {isEditAddressModalOpen && selectedAddress && (
+        <EditAddressModal address={selectedAddress} onClose={() => toggleEditAddressModal()} />
+      )}
     </div>
   );
 };
+
+const AddAddressModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [formData, setFormData] = useState<Address>({
+    name_address: "",
+    address: "",
+    city: "",
+    province: "",
+    postal_code: "",
+    phone_number: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(API_ADD_ADDRESS, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${localStorage.getItem("access_token")}`
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Address added successfully!");
+        onClose();
+      } else {
+        alert("Failed to add address.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error while adding address.");
+    } 
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-md shadow-lg w-96">
+        <h2 className="font-semibold text-lg mb-4">Add New Address</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name_address"
+            value={formData.name_address}
+            onChange={handleChange}
+            placeholder="Name Address"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            placeholder="Address"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            placeholder="City"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="province"
+            value={formData.province}
+            onChange={handleChange}
+            placeholder="Province"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="postal_code"
+            value={formData.postal_code}
+            onChange={handleChange}
+            placeholder="Postal Code"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="phone_number"
+            value={formData.phone_number}
+            onChange={handleChange}
+            placeholder="Phone Number"
+            className="w-full border p-2 rounded-md"
+          />
+          <button
+            type="submit"
+            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+          >
+            Add Address
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full mt-2 bg-gray-200 py-2 rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+const EditAddressModal: React.FC<{ address: Address; onClose: () => void }> = ({
+  address,
+  onClose,
+}) => {
+  const [formData, setFormData] = useState({
+    address: address.address || "",
+    city: address.city || "",
+    postal_code: `${address.postal_code}` || "",
+    province: address.province || "",
+    name: address.name_address || "",
+    phone_number: address.phone_number || "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch(`${API_UPDATE_ADDRESS}/${address.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        alert("Address updated successfully!");
+        onClose();
+      } else {
+        alert("Failed to update address.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error while updating address.");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+      <div className="bg-white p-6 rounded-md shadow-lg w-96">
+        <h2 className="font-semibold text-lg mb-4">Edit Address</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Name Address"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            placeholder="Address"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="city"
+            value={formData.city}
+            onChange={handleChange}
+            placeholder="City"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="province"
+            value={formData.province}
+            onChange={handleChange}
+            placeholder="Province"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="postal_code"
+            value={formData.postal_code}
+            onChange={handleChange}
+            placeholder="Postal Code"
+            className="w-full border p-2 rounded-md"
+          />
+          <input
+            type="text"
+            name="phone_number"
+            value={formData.phone_number}
+            onChange={handleChange}
+            placeholder="Phone Number"
+            className="w-full border p-2 rounded-md"
+          />
+          <button
+            type="submit"
+            className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+          >
+            Update Address
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-full mt-2 bg-gray-200 py-2 rounded hover:bg-gray-300"
+          >
+            Cancel
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 
 export default ProfilePage;
