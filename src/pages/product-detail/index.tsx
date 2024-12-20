@@ -1,4 +1,6 @@
 import ProductDetail from "@/src/components/ProductDetail";
+import { API_PRODUCT } from "@/src/constants/api";
+import useFetch from "@/src/hooks/useFetch";
 
 
 // Product Mock Up Models
@@ -14,7 +16,6 @@ const products_item = {
 };
 
 const ProductDetailPage = () => {
-
     const addToCart = () => {
         alert("Product added to cart");
     }

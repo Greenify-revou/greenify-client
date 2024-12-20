@@ -15,7 +15,7 @@ const EmailForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-sm mx-auto bg-white p-8 rounded-lg shadow-md"
+      className="max-w-md w-full mx-auto bg-white p-8 rounded-lg shadow-md py-36"
     >
       <h2 className="text-2xl font-semibold text-center mb-4">
         Forgot Password
@@ -32,13 +32,13 @@ const EmailForm = () => {
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#56B280]"
           required
         />
       </div>
       <button
         type="submit"
-        className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-400 transition"
+        className="w-full py-2 bg-[#56B280] text-white rounded-lg hover:bg-green-400 transition"
       >
         Send Verification Code
       </button>

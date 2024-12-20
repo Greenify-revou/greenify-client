@@ -4,12 +4,12 @@ import { SiGmail } from "react-icons/si";
 const Footer = () => {
     return (
         <div>
-            <footer className="flex flex-col lg:flex-row items-center justify-between px-10 py-16 lg:py-10 bg-[#E4E4E4]">
+            <footer className="flex flex-col lg:flex-row items-center justify-between px-10 py-16 lg:py-10 bg-[#16db93]">
             
                 {/* Left Side */}
                 <div className="lg:w-1/2 mt-8 lg:mt-0">
                     <img
-                        src="logo-greenify.png"
+                        src="greenify-newlogo.png"
                         alt="brand-logo"
                         className="mx-auto"
                         width={300}

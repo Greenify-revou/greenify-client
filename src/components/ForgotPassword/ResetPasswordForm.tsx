@@ -17,7 +17,7 @@ const ResetPasswordForm = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="max-w-sm mx-auto bg-white p-8 rounded-lg shadow-md"
+      className="max-w-md w-full mx-auto bg-white p-8 rounded-lg shadow-md py-32"
     >
       <h2 className="text-2xl font-semibold text-center mb-4">Reset Password</h2>
       <div className="mb-4">
@@ -29,7 +29,7 @@ const ResetPasswordForm = () => {
           id="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#56B280]"
           required
         />
       </div>
@@ -42,13 +42,13 @@ const ResetPasswordForm = () => {
           id="confirmPassword"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#56B280]"
           required
         />
       </div>
       <button
         type="submit"
-        className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-400 transition"
+        className="w-full py-2 bg-[#56B280] text-white rounded-lg hover:bg-green-400 transition"
       >
         Reset Password
       </button>
