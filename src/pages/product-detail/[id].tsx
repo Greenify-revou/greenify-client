@@ -25,11 +25,17 @@ const ProductDetailPage = () => {
     const router = useRouter();
     const { id } = router.query;
 
-    const { data, loading, error } = useFetch<Response>({ endpoint: API_PRODUCT + `/${id}` })
+    const { data, loading, error } = useFetch<Response>({ endpoint: API_PRODUCT + `/${id}` });
 
-    const product = data?.data || [];
+    if (loading) {
+        return (
+            <div className="text-center py-16">
+                <h1 className="text-2xl font-bold text-gray-700">Loading...</h1>
+            </div>
+        );
+    }
 
-    if (!product) {
+    if (error || !data?.data) {
         return (
             <div className="text-center py-16">
                 <h1 className="text-2xl font-bold text-gray-700">Product Not Found</h1>
@@ -43,7 +49,27 @@ const ProductDetailPage = () => {
         );
     }
 
-    return <ProductDetail {...product} />;
+    const product = data.data;
+
+    // Map Product to match ProductDetailCardProps
+    const productProps = {
+        id: product.id,
+        product_name: product.product_name,
+        price: product.price,
+        product_desc: product.product_desc,
+        category: product.category,
+        eco_point: product.eco_point,
+        recycle_material: product.recycle_material,
+        stok: product.stok,
+        image_url: product.image, // Rename `image` to `image_url`
+        reviews: {
+            average_rating: null, // Example data (replace with actual)
+            total_reviews: 0, // Example data (replace with actual)
+            reviews: [], // Example data (replace with actual)
+        },
+    };
+
+    return <ProductDetail {...productProps} />;
 };
 
 export default ProductDetailPage;

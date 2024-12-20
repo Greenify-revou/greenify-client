@@ -12,7 +12,7 @@ interface RegisterFormBiodataProps {
 
 const RegisterFormBiodata = ({
   onSubmit,
-  onNext
+  // onNext
 }: RegisterFormBiodataProps) => {
   const [formData, setFormData] = useState({
     fullName: '',

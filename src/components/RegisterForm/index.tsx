@@ -2,7 +2,7 @@ import { API_EMAIL_VALIDATION} from "@/src/constants/api";
 import { useState } from "react";
 import Link from "next/link";
 import { FaArrowLeft } from "react-icons/fa"; 
-import { useRouter } from "next/router";
+// import { useRouter } from "next/router";
 
 interface RegisterFormProps {
   getEmail: (email: string) => void;
@@ -28,7 +28,7 @@ const RegisterForm = ({ getEmail, onNext }: RegisterFormProps) => {
         throw new Error(`Error: ${response.status} ${response.statusText}`);
       }
 
-      const json = await response.json();
+      // const json = await response.json();
 
       getEmail(email);
     } catch (error) {

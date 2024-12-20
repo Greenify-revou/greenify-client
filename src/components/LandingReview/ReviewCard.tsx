@@ -1,4 +1,4 @@
-import { FaStar, FaRegStar, FaEye } from "react-icons/fa";
+import { FaStar, FaRegStar } from "react-icons/fa";
 
 interface ReviewProps {
     id: number,

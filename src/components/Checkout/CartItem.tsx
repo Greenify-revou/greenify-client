@@ -1,5 +1,5 @@
 import React from "react";
-import CartSummary from "../Checkout/CartSummary";
+// import CartSummary from "../Checkout/CartSummary";
 
 interface CartItemProps {
   id: number;

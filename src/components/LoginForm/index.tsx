@@ -36,7 +36,7 @@ const LoginForm = () => {
       <form onSubmit={handleSubmit}>
         <h2 className="text-3xl font-medium text-center mb-2">Log In</h2>
         <p className="text-base font-medium text-center mb-12">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
             href="/register"
             className="text-dark-green hover:opacity-50 transition-all duration-300"

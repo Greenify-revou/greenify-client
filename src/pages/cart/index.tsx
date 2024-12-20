@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useCart } from "../../context/CartContext";
-import Link from "next/link";
+
 import { API_CART_CHECKOUT} from "@/src/constants/api";
 import { useRouter } from "next/router";
-import { clear } from "console";
+
 
 const CartPage = () => {
   const { cartItems, loading, clearCart, removeFromCart, updateQuantity } = useCart();
-  const [orderId, setOrderId] = useState<number>(0);
   const router = useRouter();
 
   const handleIncrease = (itemId: number) => {

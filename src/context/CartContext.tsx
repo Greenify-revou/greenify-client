@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { API_ADD_TO_CART, API_CART_ITEMS, API_DECREASE_ITEM_CART, API_UPDATE_CART } from "../constants/api";
-import useFetch from "../hooks/useFetch";
+import { API_ADD_TO_CART, API_CART_ITEMS, API_UPDATE_CART } from "../constants/api";
+// import useFetch from "../hooks/useFetch";
 
 // Interface untuk Cart Item
 interface CartItem {
@@ -23,11 +23,11 @@ interface CartContextType {
   updateQuantity: (id: number, quantityChange: number) => void;
 }
 
-interface Response {
-  data: CartItem[];
-  message: string;
-  status: number;
-}
+// interface Response {
+//   data: CartItem[];
+//   message: string;
+//   status: number;
+// }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 

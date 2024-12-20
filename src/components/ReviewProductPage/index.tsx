@@ -13,15 +13,15 @@ const ReviewProductPage: React.FC<{ products: Product[] }> = ({ products }) => {
     [key: number]: { rating: number | null; text: string };
   }>({});
 
-  const handleRatingChange = (productId: number, rating: number) => {
-    setReviews((prev) => {
-      const currentRating = prev[productId]?.rating;
-      return {
-        ...prev,
-        [productId]: { ...prev[productId], rating: currentRating === rating ? null : rating },
-      };
-    });
-  };
+  // const handleRatingChange = (productId: number, rating: number) => {
+  //   setReviews((prev) => {
+  //     const currentRating = prev[productId]?.rating;
+  //     return {
+  //       ...prev,
+  //       [productId]: { ...prev[productId], rating: currentRating === rating ? null : rating },
+  //     };
+  //   });
+  // };
 
   const handleTextChange = (productId: number, text: string) => {
     setReviews((prev) => ({
