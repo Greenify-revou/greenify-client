@@ -38,8 +38,15 @@ const ProductCard = ({
     const averageRating = reviews?.average_rating;
     const totalReviews = reviews?.total_reviews;
 
+    const discountedPrice = discount ? price - (price * discount) / 100 : price;
+
     // Format price to Indonesian Rupiah
     const formattedPrice = new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+    }).format(discountedPrice);
+
+    const originalPrice = new Intl.NumberFormat("id-ID", {
         style: "currency",
         currency: "IDR",
     }).format(price);
@@ -50,13 +57,6 @@ const ProductCard = ({
                 className="bg-white shadow-md rounded-lg overflow-hidden cursor-pointer hover:shadow-xl hover:scale-105 transition-transform border border-gray-200 relative flex flex-col h-96"
                 aria-label={`View details of ${product_name}`}
             >
-                {/* Discount Badge */}
-                {discount && discount > 0 && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
-                        -{discount}%
-                    </div>
-                )}
-
                 {/* Product Image */}
                 <div className="relative w-full h-40">
                     <Image
@@ -81,10 +81,22 @@ const ProductCard = ({
                         {category_name}
                     </span>
 
-                    {/* Product Price */}
-                    <p className="text-lg font-bold text-[#56B280] mt-auto">
-                        {formattedPrice}
-                    </p>
+                   {/* Product Price and Discount */}
+                   <div className="mt-auto flex items-center">
+                        <p className="text-lg font-bold text-[#56B280]">
+                            {formattedPrice}
+                        </p>
+                        {discount && discount > 0 && (
+                            <span className="ml-2 text-xs bg-red-500 text-white font-semibold px-2 py-1 rounded">
+                                -{discount}%
+                            </span>
+                        )}
+                    </div>
+                    {discount && discount > 0 && (
+                        <p className="text-xs text-gray-500 line-through">
+                            {originalPrice}
+                        </p>
+                    )}
 
                     {/* Average Rating */}
                     <div className="flex items-center text-sm text-yellow-500 mt-2">
