@@ -55,6 +55,7 @@ const ProductDetailPage = () => {
         eco_point: product.eco_point,
         recycle_material: product.recycle_material,
         stock: product.stock,
+        discount : product.discount,
         image_url: product.image_url, // Renaming `image` to `image_url`
         reviews: {
             average_rating: product.reviews?.average_rating || null, // Ensure `average_rating` exists or set to null
