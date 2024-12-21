@@ -1,6 +1,7 @@
 export const API_URL = "https://grieving-ryann-greenify-31e89a90.koyeb.app/api/v1";
 export const API_ME = `${API_URL}/profile/me`;
 export const API_SELLER_PROFILE = `${API_URL}/sellers/profile`;
+export const UPDATE_SELLER = `${API_URL}/sellers/update-seller`;
 export const API_LOGIN = `${API_URL}/auth/login`;
 export const API_EMAIL_VALIDATION = `${API_URL}/users/email-validation`;
 export const API_CHECK_OTP = `${API_URL}/users/otp-validation`;
@@ -32,3 +33,9 @@ export const API_GET_SELLER_VOUCHER = `${API_URL}/sellers/get-seller-vouchers`;
 export const API_CREATE_VOUCHER = `${API_URL}/vouchers/add-voucher`;
 export const API_UPDATE_VOUCHER = `${API_URL}/vouchers/update-voucher`;
 export const GOOD_REVIEW = `${API_URL}/reviews/good-reviews`;
+export const API_SELLER_METRIC = `${API_URL}/sellers/seller-metric`;
+export const API_SELLER_HISTORY = `${API_URL}/sellers/seller-transaction-history`;
+export const API_SELLER_SALES = `${API_URL}/sellers/seller-sales`;
+
+
+
