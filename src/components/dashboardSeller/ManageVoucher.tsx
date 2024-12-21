@@ -3,6 +3,7 @@ import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 import ReusableModal from "./ReusableModal";
 import { API_GET_SELLER_VOUCHER, API_CREATE_VOUCHER, API_UPDATE_VOUCHER, API_GET_ALL_SELLER_PRODUCT } from "@/src/constants/api";
+import router from "next/router";
 
 interface Voucher {
     id: number;
@@ -74,10 +75,12 @@ const ManageVouchers = () => {
                 },
             });
             const data = await response.json();
-            if (data && data.status === "success") {
+            if (data && data.status === "success" && data.data.length > 0) {
                 setProducts(data.data);
             } else {
-                Swal.fire("Error", "Failed to fetch products", "error");
+                Swal.fire("No Products Found", "Redirecting to dashboard...", "warning").then(() => {
+                    router.push("/dashboard-seller"); // Redirect to dashboard
+                });
             }
         } catch {
             Swal.fire("Error", "Failed to fetch products", "error");

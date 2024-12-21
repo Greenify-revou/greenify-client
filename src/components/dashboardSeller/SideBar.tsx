@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiHome, FiBox, FiTag, FiBarChart2 } from "react-icons/fi";
+import { FiHome, FiBox, FiTag, FiUser } from "react-icons/fi"; // Added FiUser for the Seller Profile icon
 import NavItem from "./NavItem";
 import { useRouter } from "next/router";
 
@@ -30,6 +30,12 @@ const Sidebar: React.FC = () => {
               active={router.pathname === "/dashboard-seller"}
             />
             <NavItem
+              icon={<FiUser />} // Seller Profile icon
+              label="Seller Profile"
+              href="/dashboard-seller/seller-profile"
+              active={router.pathname === "/dashboard-seller/seller-profile"}
+            />
+            <NavItem
               icon={<FiTag />}
               label="Voucher"
               href="/dashboard-seller/voucherPage"
@@ -40,12 +46,6 @@ const Sidebar: React.FC = () => {
               label="Product"
               href="/dashboard-seller/productPage"
               active={router.pathname === "/dashboard-seller/productPage"}
-            />
-            <NavItem
-              icon={<FiBarChart2 />}
-              label="Transaction History"
-              href="/dashboard-seller/transaction-history"
-              active={router.pathname === "/dashboard-seller/transaction-history"}
             />
           </>
         )}

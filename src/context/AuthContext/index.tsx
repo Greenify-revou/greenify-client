@@ -39,10 +39,10 @@ interface AuthContextType {
   sellerProfile: SellerProfile | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  fetchSellerProfile: () => Promise<void>;
-  fetchUserProfile: () => Promise<void>;
+  fetchSellerProfile: () => Promise<boolean>;
+  fetchUserProfile: () => Promise<boolean>;
   updateUser: (updatedUserData: Partial<User>) => Promise<void>;
 }
 
@@ -62,32 +62,58 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Fetch user profile
-  const fetchUserProfile = async () => {
-    try {
-      const response = await fetch(API_ME, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
-        },
-      });
-
-      const json = await response.json();
-
-      if (!response.ok) {
-        throw new Error(`Fetch user profile failed: ${json.message}`);
+  const fetchUserProfile = async (retries = 3): Promise<boolean> => {
+    while (retries > 0) {
+      try {
+        const response = await fetch(API_ME, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        });
+  
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.warn("Fetch user profile failed:", errorData.message);
+          retries--;
+          if (retries === 0) {
+              // Swal.fire({
+              //   icon: "warning",
+              //   title: "Fetch User Failed",
+              //   text: errorData.message || "Could not retrieve user profile.",
+              // });
+            setIsAuthenticated(false);
+            setUser(null);
+            return false;
+          }
+          continue; // Retry the request
+        }
+  
+        const json = await response.json();
+        setUser(json.data);
+        setIsAuthenticated(true);
+        return true;
+      } catch (error) {
+        console.error("Fetch user profile error:", error);
+        retries--;
+        if (retries === 0) {
+          Swal.fire({
+            icon: "error",
+            title: "Network Error",
+            text: "Failed to connect to the server. Please try again later.",
+          });
+          setIsAuthenticated(false);
+          setUser(null);
+          return false;
+        }
       }
-
-      setUser(json.data);
-      setIsAuthenticated(true);
-    } catch (error) {
-      console.error("Failed to fetch user profile:", error);
-      setIsAuthenticated(false); // Ensure the user is logged out if fetching fails
     }
+    return false;
   };
 
   // Fetch seller profile
-  const fetchSellerProfile = async () => {
+  const fetchSellerProfile = async (): Promise<boolean> => {
     try {
       const response = await fetch(API_SELLER_PROFILE, {
         method: "GET",
@@ -97,40 +123,56 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
       });
 
-      const json = await response.json();
-
       if (!response.ok) {
-        console.warn(`Fetch seller profile failed: ${json.message}`);
+        const errorData = await response.json();
+        console.warn("Fetch seller profile failed:", errorData.message);
+        setSellerProfile(null);
+        return false;
       }
+
+      const json = await response.json();
       setSellerProfile(json.data);
+      return true;
     } catch (error) {
       console.error("Failed to fetch seller profile:", error);
+      setSellerProfile(null);
+      return false;
     }
   };
 
   // Optimized function to fetch both profiles concurrently
-  const initializeAuth = async () => {
+  const initializeAuth = async (): Promise<boolean> => {
     try {
       setLoading(true);
 
       const token = localStorage.getItem("access_token");
       if (!token) {
         setIsAuthenticated(false);
-        setLoading(false);
-        return;
+        setUser(null);
+        setSellerProfile(null);
+        return false;
       }
 
       // Fetch user and seller profiles concurrently
-      await Promise.all([fetchUserProfile(), fetchSellerProfile()]);
+      const [userSuccess, sellerSuccess] = await Promise.all([
+        fetchUserProfile(),
+        fetchSellerProfile(),
+      ]);
+
+      return userSuccess && sellerSuccess;
     } catch (error) {
       console.error("Initialization error:", error);
+      setIsAuthenticated(false);
+      setUser(null);
+      setSellerProfile(null);
+      return false;
     } finally {
       setLoading(false);
     }
   };
 
   // Login function
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
       const response = await fetch(API_LOGIN, {
@@ -141,31 +183,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const json = await response.json();
-
-      if (response.status === 401) {
+      if (!response.ok) {
+        const errorData = await response.json();
         Swal.fire({
           icon: "error",
           title: "Login Failed",
-          text: json.message ? json.message : "Unknown error occurred",
+          text: errorData.message || "Invalid email or password.",
         });
-        setIsAuthenticated(false);
-        return;
+        return false;
       }
 
+      const json = await response.json();
       localStorage.setItem("access_token", json.data.access_token);
-      await initializeAuth();
+
+      const authSuccess = await initializeAuth();
+      if (authSuccess) {
+        Swal.fire({
+          icon: "success",
+          title: "Login Successful",
+          text: "You have been logged in successfully!",
+        });
+      }
+      return authSuccess;
     } catch (error) {
       console.error("Login error:", error);
-
-      // SweetAlert for login failure
       Swal.fire({
         icon: "error",
-        title: "Login Failed",
-        text: error instanceof Error ? error.message : "Unknown error occurred",
+        title: "Network Error",
+        text: "Failed to connect to the server. Please try again later.",
       });
-
-      setIsAuthenticated(false);
+      return false;
     } finally {
       setLoading(false);
     }
@@ -182,15 +229,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       icon: "success",
       title: "Logged Out",
       text: "You have successfully logged out.",
+    }).then(() => {
+      window.location.href = "/"; // Redirect to home
     });
   };
 
-  // Initialize authentication state on first render
-  useEffect(() => {
-    initializeAuth();
-  }, []);
-
-  const updateUser = async (updatedUserData: Partial<User>) => {
+  // Update user profile
+  const updateUser = async (updatedUserData: Partial<User>): Promise<void> => {
     try {
       const response = await fetch(API_ME, {
         method: "PUT",
@@ -200,12 +245,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         },
         body: JSON.stringify(updatedUserData),
       });
-      const json = await response.json();
+
       if (!response.ok) {
-        throw new Error(`Update user failed: ${json.message}`);
+        const errorData = await response.json();
+        throw new Error(`Update user failed: ${errorData.message}`);
       }
-      // Update the local user state with the new data
-      setUser((prevUser) => (prevUser ? { ...prevUser, ...updatedUserData } : null));
+
+      const json = await response.json();
+      setUser((prevUser) => (prevUser ? { ...prevUser, ...json.data } : null));
 
       Swal.fire({
         icon: "success",
@@ -213,15 +260,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         text: "Your profile has been updated successfully!",
       });
     } catch (error) {
-      console.error(error);
+      console.error("Update user error:", error);
       Swal.fire({
         icon: "error",
         title: "Update Failed",
         text: "Failed to update profile. Please try again later.",
       });
-      throw new Error("Failed to update user");
     }
   };
+
+  // Initialize authentication state on first render
+  useEffect(() => {
+    initializeAuth();
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -243,7 +294,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 };
 
 // Custom hook to use AuthContext
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider");
