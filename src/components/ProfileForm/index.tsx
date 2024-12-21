@@ -1,7 +1,7 @@
-import { API_ADD_ADDRESS, API_UPDATE_ADDRESS } from "@/src/constants/api";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/src/context/AuthContext";
-import React, { useState } from "react";
 import Swal from "sweetalert2";
+import { API_ADD_ADDRESS, API_GET_WISHLIST, API_REMOVE_WISHLIST, API_UPDATE_ADDRESS } from "@/src/constants/api";
 
 interface Address {
   id?: number;
@@ -11,6 +11,29 @@ interface Address {
   province: string;
   postal_code: string;
   phone_number: string;
+}
+
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  final_price: number;
+  discount: number;
+  stock: number;
+  eco_point: number;
+  recycle_material_percentage: number;
+  image_url: string;
+  reviews?: number;
+  rating?: number;
+}
+
+interface WishlistItem {
+  id: number;
+  product_id: number;
+  product: Product;
+  created_at: string;
+  is_active: boolean;
 }
 
 interface User {
@@ -25,23 +48,89 @@ interface User {
 }
 
 const ProfilePage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"profile" | "address">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "address" | "wishlist">("profile");
   const { user, fetchUserProfile } = useAuth();
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
+
+  useEffect(() => {
+    if (activeTab === "wishlist") {
+      fetchWishlist();
+    }
+  }, [activeTab]);
+
+  const fetchWishlist = async () => {
+    try {
+      const response = await fetch(API_GET_WISHLIST, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setWishlist(data.data);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Load Wishlist",
+          text: data.message || "An error occurred while fetching the wishlist.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An unexpected error occurred while loading the wishlist.",
+      });
+    }
+  };
+
+  const removeFromWishlist = async (productId: number) => {
+    try {
+      const response = await fetch(API_REMOVE_WISHLIST, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ product_id: productId }),
+      });
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Removed",
+          text: "The item was removed from your wishlist.",
+        });
+        setWishlist((prev) => prev.filter((item) => item.product_id !== productId));
+      } else {
+        const data = await response.json();
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: data.message || "Failed to remove the item from your wishlist.",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An unexpected error occurred.",
+      });
+    }
+  };
 
   if (!user) {
     return <div>Loading...</div>;
   }
 
-  const handleTabChange = (tab: "profile" | "address") => {
+  const handleTabChange = (tab: "profile" | "address" | "wishlist") => {
     setActiveTab(tab);
   };
 
-  const handleAddressUpdate = async () => {
-    await fetchUserProfile(); // Refetch the user data to update the address list
-  };
-
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow rounded">
+    <div className="max-w-5xl mx-auto p-6 bg-gray-100 shadow rounded">
       <div className="border-b flex space-x-4 mb-6">
         <button
           onClick={() => handleTabChange("profile")}
@@ -59,16 +148,89 @@ const ProfilePage: React.FC = () => {
         >
           Address List
         </button>
+        <button
+          onClick={() => handleTabChange("wishlist")}
+          className={`pb-2 text-lg font-semibold ${
+            activeTab === "wishlist" ? "border-b-2 border-green-500 text-green-500" : "text-gray-700"
+          }`}
+        >
+          Wishlist
+        </button>
       </div>
 
       {activeTab === "profile" ? (
         <PersonalProfile user={user} />
+      ) : activeTab === "address" ? (
+        <AddressList addresses={user.addresses} onAddressChange={fetchUserProfile} />
       ) : (
-        <AddressList addresses={user.addresses} onAddressChange={handleAddressUpdate} />
+        <Wishlist wishlist={wishlist} onRemove={removeFromWishlist} />
       )}
     </div>
   );
 };
+
+const Wishlist: React.FC<{ wishlist: WishlistItem[]; onRemove: (productId: number) => void }> = ({ wishlist, onRemove }) => {
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-6">Your Wishlist</h2>
+      {wishlist.length === 0 ? (
+        <p className="text-center text-gray-500">No items in your wishlist yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {wishlist.map((item) => (
+            <div
+              key={item.id}
+              className="border border-gray-300 rounded-lg p-4 bg-white shadow-md flex flex-col items-center text-center"
+            >
+              <img
+                src={item.product.image_url}
+                alt={item.product.name}
+                className="w-24 h-24 object-cover mb-4 rounded"
+              />
+              <h3 className="font-bold text-sm mb-2">{item.product.name}</h3>
+              <p className="text-gray-700 text-xs mb-3">
+                {item.product.description.length > 50
+                  ? `${item.product.description.substring(0, 50)}...`
+                  : item.product.description}
+              </p>
+              <div className="mb-2">
+                <p className="text-green-500 font-bold text-sm">
+                  {item.product.final_price.toLocaleString("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                  })}
+                </p>
+                {item.product.discount > 0 && (
+                  <p className="text-gray-500 line-through text-xs">
+                    {item.product.price.toLocaleString("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                    })}
+                  </p>
+                )}
+              </div>
+              <div className="flex justify-between w-full items-center text-xs">
+                <p className="text-gray-700">
+                  Eco Points: <span className="font-semibold">{item.product.eco_point}</span>
+                </p>
+                <p className="text-gray-700">
+                  Rating: <span className="font-semibold">{item.product.rating || 0}/5</span>
+                </p>
+              </div>
+              <button
+                className="mt-4 bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-600"
+                onClick={() => onRemove(item.product_id)}
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 
 interface PersonalProfileProps {
   user: User | null;
