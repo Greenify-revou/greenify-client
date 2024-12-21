@@ -1,28 +1,31 @@
-import { useAuth } from '@/src/context/AuthContext'
-import { useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React, { useEffect } from 'react';
+import { useAuth } from '@/src/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface ProtectedRouteProps {
-    children: React.ReactNode
+  children: React.ReactNode;
 }
 
-const ProtectedRoute = ({children}: ProtectedRouteProps) => {
-    const {isAuthenticated, loading} = useAuth()
-    const router = useRouter()
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  const router = useRouter();
 
-    useEffect(() => {
-      const token = localStorage.getItem('access_token')
-      if (!isAuthenticated && !token) {
-          router.push('/login')
-      }
-    }, [isAuthenticated])
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    if (!isAuthenticated && !token) {
+      router.push('/login');
+    }
+  }, [isAuthenticated, router]);
 
-  return (
-    loading || isAuthenticated ? 
-    (<div>{children}</div>)
-    : 
-    (<p>Loading...</p>)
-  )
-}
+  if (loading) {
+    return <p>Loading...</p>;
+  }
 
-export default ProtectedRoute
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
+
+export default ProtectedRoute;
