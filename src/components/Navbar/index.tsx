@@ -256,7 +256,7 @@ const Navbar = () => {
               {sellerProfile ? (
                 <div
                   className="flex items-center gap-2 cursor-pointer"
-                  onClick={() => router.push("/seller-profile")}
+                  onClick={() => router.push("/dashboard-seller")}
                 >
                   <Image
                     src={sellerProfile.store_logo || "/default-store-logo.png"}
