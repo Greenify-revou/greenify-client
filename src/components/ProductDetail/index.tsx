@@ -1,6 +1,9 @@
-import { FaCartPlus, FaStar } from "react-icons/fa";
+import { FaCartPlus, FaStar, FaHeart } from "react-icons/fa";
 import { useCart } from "../../context/CartContext";
 import Image from "next/image";
+import Swal from "sweetalert2";
+import router from "next/router";
+import { API_ADD_WISHLIST } from "@/src/constants/api";
 
 interface Review {
   user_name: string;
@@ -53,40 +56,87 @@ const ProductDetailCard = ({
     };
     addToCart(item);
   };
+  const isAuthenticated = !!localStorage.getItem("access_token"); // Check if the user is authenticated
+  const handleAddToWishlist = async () => {
+    if (!isAuthenticated) {
+      Swal.fire({
+        icon: "warning",
+        title: "Login Required",
+        text: "You need to be logged in to add items to your wishlist.",
+        confirmButtonText: "Login Now",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          router.push("/login"); // Redirect to login if not authenticated
+        }
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(API_ADD_WISHLIST, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+        },
+        body: JSON.stringify({ product_id: id }),
+      });
+
+      const result = await response.json();
+
+      if (result.status == 'success') {
+        Swal.fire({
+          icon: "success",
+          title: "Added to Wishlist",
+          text: "This product has been added to your wishlist.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Failed to Add to Wishlist",
+          text: result.message || "An unexpected error occurred.",
+        });
+      }
+    } catch (error) {
+      console.error("Error adding product to wishlist:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while adding the product to your wishlist.",
+      });
+    }
+  };
 
   const images = image_url ? image_url.split(";") : [];
-
   const discountedPrice = discount ? price - (price * discount) / 100 : price;
-
-  console.log(stock)
 
   return (
     <section className="max-w-screen-xl mx-auto p-6">
       {/* Product Details Section */}
       <div className="flex flex-col lg:flex-row items-center justify-between bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Image Section */}
-        <div className="lg:w-1/2 px-4">
-          <div className="flex flex-col gap-4">
+        <div className="lg:w-1/2 px-6">
+          <div className="flex flex-col gap-6">
             {images.length > 0 && (
               <Image
                 src={images[0]}
                 alt={`${product_name} main image`}
-                className="rounded-lg"
-                layout="responsive"
-                width={250}
-                height={250}
+                className="rounded-lg object-contain mx-auto"
+                layout="intrinsic"
+                width={500} // Limit the width
+                height={550} // Adjust the height proportionally
               />
             )}
             <div className="flex gap-2 overflow-x-auto">
               {images.map((url, index) => (
-                <div key={index} className="w-20 h-20 flex-shrink-0">
+                <div key={index} className="w-16 h-16 flex-shrink-0">
                   <Image
                     src={url}
                     alt={`${product_name} image ${index + 1}`}
                     className="rounded-lg object-cover"
                     layout="fixed"
-                    width={80}
-                    height={80}
+                    width={60}
+                    height={60}
                   />
                 </div>
               ))}
@@ -134,13 +184,22 @@ const ProductDetailCard = ({
             </p>
           </div>
 
-          <button
-            onClick={handleAddToCart}
-            className="flex items-center justify-center mt-6 bg-[#56B280] text-white text-lg font-medium py-2 px-6 rounded-lg hover:bg-[#070707] hover:shadow-md transition"
-            disabled={stock <= 0}
-          >
-            <FaCartPlus className="mr-2" /> Add to Cart
-          </button>
+          {/* Buttons */}
+          <div className="flex gap-4 mt-6">
+            <button
+              onClick={handleAddToCart}
+              className="flex items-center justify-center bg-[#56B280] text-white text-lg font-medium py-2 px-6 rounded-lg hover:bg-[#070707] hover:shadow-md transition"
+              disabled={stock <= 0}
+            >
+              <FaCartPlus className="mr-2" /> Add to Cart
+            </button>
+            <button
+              onClick={handleAddToWishlist}
+              className="flex items-center justify-center bg-[#ff6b6b] text-white text-lg font-medium py-2 px-6 rounded-lg hover:bg-[#070707] hover:shadow-md transition"
+            >
+              <FaHeart className="mr-2" /> Add to Wishlist
+            </button>
+          </div>
         </div>
       </div>
 
@@ -191,7 +250,6 @@ const ProductDetailCard = ({
           )}
         </div>
       </div>
-
     </section>
   );
 };
