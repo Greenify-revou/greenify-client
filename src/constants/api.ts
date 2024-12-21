@@ -36,6 +36,9 @@ export const GOOD_REVIEW = `${API_URL}/reviews/good-reviews`;
 export const API_SELLER_METRIC = `${API_URL}/sellers/seller-metric`;
 export const API_SELLER_HISTORY = `${API_URL}/sellers/seller-transaction-history`;
 export const API_SELLER_SALES = `${API_URL}/sellers/seller-sales`;
+export const API_ADD_WISHLIST = `${API_URL}/wishlist/add-to-wishlist`;
+export const API_GET_WISHLIST = `${API_URL}/wishlist/get-wishlist`;
+export const API_REMOVE_WISHLIST = `${API_URL}/wishlist/remove-from-wishlist`; 
 
 
 
