@@ -1,3 +1,4 @@
+import ProtectedRoute from "@/src/components/ProtectedRoute";
 import dynamic from "next/dynamic";
 
 // Dynamically import Sidebar and HomeSection without SSR
@@ -6,12 +7,14 @@ const HomeSection = dynamic(() => import("@/src/components/dashboardSeller/HomeS
 
 const Dashboard = () => {
   return (
-    <div className="flex bg-[#F9FAFB]">
-      <Sidebar />
-      <div className="flex-1 overflow-auto">
-        <HomeSection />
+    <ProtectedRoute>
+      <div className="flex bg-[#F9FAFB] min-h-screen">
+        <Sidebar />
+        <div className="flex-1 overflow-auto">
+          <HomeSection />
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 };
 
